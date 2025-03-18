@@ -1,0 +1,15 @@
+# NAME: PBS
+# AUTHOR: 
+# REPO: https://github.com/gtolog/rule-set
+# UPDATED: 2025-03-18 13:48:00
+# HOST: 0
+# HOST-KEYWORD: 0
+# HOST-SUFFIX: 2
+# IP-CIDR: 0
+# IP6-CIDR: 0
+# USER-AGENT: 0
+# TOTAL: 2
+# COMMENTS: manually maintained
+# CREATED: 2025-03-18 13:48:00
+HOST-SUFFIX,pbs.org,PBS
+HOST-SUFFIX,pbskids.org,PBS
