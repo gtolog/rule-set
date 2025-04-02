@@ -4,11 +4,11 @@
 # UPDATED: 2025-04-02 10:18:00
 # HOST: 0
 # HOST-KEYWORD: 0
-# HOST-SUFFIX: 12
+# HOST-SUFFIX: 13
 # IP-CIDR: 0
 # IP6-CIDR: 0
 # USER-AGENT: 0
-# TOTAL: 12
+# TOTAL: 13
 # COMMENTS: manually maintained
 # CREATED: 2025-03-18 13:48:00
 HOST-SUFFIX,sagernet.org,GTO
@@ -23,3 +23,4 @@ HOST-SUFFIX,strem.fun,GTO
 HOST-SUFFIX,thexem.info,GTO
 HOST-SUFFIX,imgflip.com,GTO
 HOST-SUFFIX,tubi.tv,GTO
+HOST-SUFFIX,tubitv.com,GTO
