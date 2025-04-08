@@ -22,17 +22,24 @@ HOST-SUFFIX,strem.io,GTO
 HOST-SUFFIX,strem.fun,GTO
 HOST-SUFFIX,thexem.info,GTO
 HOST-SUFFIX,imgflip.com,GTO
+HOST-SUFFIX,brew.sh,GTO
+
+# tubi
 HOST-SUFFIX,tubi.tv,GTO
 HOST-SUFFIX,tubitv.com,GTO
 HOST-SUFFIX,tubi.io,GTO
 HOST-SUFFIX,tubi.video,GTO
 HOST-SUFFIX,adrise.tv,GTO
 HOST-SUFFIX,licensekeyserver.com,GTO
+
+# torrent
 HOST-SUFFIX,rutracker.org,GTO
 HOST-SUFFIX,rutracker.ru,GTO
 HOST-SUFFIX,yts.mx,GTO
 HOST-SUFFIX,bt4gprx.com,GTO
 HOST-SUFFIX,bt4g.com,GTO
+
+# tv
 HOST-SUFFIX,moveonjoy.com,GTO
 HOST-SUFFIX,warnermediacdn.com,GTO
 HOST-SUFFIX,akamaized.net,GTO
