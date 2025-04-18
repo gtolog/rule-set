@@ -12,6 +12,8 @@ HOST,httpdnsmultiapivip.meituan.com,DoH-elf
 IP-CIDR,103.37.155.60/32,DoH-elf
 HOST,hcdnl.pull302.gslb.livehwc3.cn,DoH-elf
 HOST,httpdns.meituan.com,DoH-elf
+HOST,202.90.110.46,DoH-elf
+HOST,202.90.108.13,DoH-elf
 IP-CIDR,202.90.110.46/32,DoH-elf
 IP-CIDR,202.90.108.13/32,DoH-elf
 
