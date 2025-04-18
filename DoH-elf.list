@@ -8,6 +8,7 @@ HOST,aedns.weixin.qq.com,DoH-elf
 HOST,resolvers-cn.httpdns.aliyuncs.com,DoH-elf
 HOST,httpdns.baidubce.com,DoH-elf
 HOST,dnspod.meituan.httpdns.qcloud.com,DoH-elf
+HOST,httpdnsmultiapi.meituan.com,DoH-elf
 HOST,httpdnsmultiapivip.meituan.com,DoH-elf
 IP-CIDR,103.37.155.60/32,DoH-elf
 HOST,hcdnl.pull302.gslb.livehwc3.cn,DoH-elf
@@ -19,7 +20,14 @@ IP-CIDR,202.90.108.13/32,DoH-elf
 IP-CIDR,103.41.167.237/32,DoH-elf
 
 # pingduoduo
-
+IP-CIDR,81.69.130.131/32,DoH-elf
+IP-CIDR,101.35.204.35/32,DoH-elf
+IP-CIDR,101.35.212.35/32,DoH-elf
+IP-CIDR,114.110.96.6/32,DoH-elf
+IP-CIDR,114.110.96.26/32,DoH-elf
+IP-CIDR,114.110.97.30/32,DoH-elf
+IP-CIDR,114.110.97.97/32,DoH-elf
+IP-CIDR,121.5.84.85/32,DoH-elf
 
 # baidu
 HOST,httpdns.baidu.com,DoH-elf
