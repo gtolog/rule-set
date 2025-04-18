@@ -9,3 +9,4 @@ HOST,dnspod.meituan.httpdns.qcloud.com,DoH
 HOST,httpdnsmultiapivip.meituan.com,DoH
 HOST,hcdnl.pull302.gslb.livehwc3.cn,DoH
 HOST,httpdns.meituan.com,DoH
+IP-CIDR,103.37.155.60/32,DoH
