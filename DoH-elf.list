@@ -38,3 +38,6 @@ HOST,dns.iqiyi.com,DoH-elf
 HOST,doh.iqiyi.com,DoH-elf
 HOST,dns.qiyipic.iqiyi.com,DoH-elf
 HOST,httpdns.n.shifen.com,DoH-elf
+
+# taobao
+HOST,amdc.m.taobao.com,DoH-elf
