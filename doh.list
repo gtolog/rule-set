@@ -1,0 +1,11 @@
+# wechat
+HOST,dns.weixin.qq.com,DoH
+HOST,paydns.weixin.qq.com,DoH
+
+# meituan
+HOST,resolvers-cn.httpdns.aliyuncs.com,DoH
+HOST,httpdns.baidubce.com,DoH
+HOST,dnspod.meituan.httpdns.qcloud.com,DoH
+HOST,httpdnsmultiapivip.meituan.com,DoH
+HOST,hcdnl.pull302.gslb.livehwc3.cn,DoH
+HOST,httpdns.meituan.com,DoH
