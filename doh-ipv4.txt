@@ -1,5 +1,0 @@
-121.51.30.167    # paydns.weixin.qq.com
-121.51.29.203    # paydns.weixin.qq.com
-121.51.30.166    # paydns.weixin.qq.com
-121.51.29.199    # paydns.weixin.qq.com
-43.159.235.61    # dns.weixin.qq.com
