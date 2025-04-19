@@ -39,23 +39,34 @@ jobs:
           # Create an empty file for IP-CIDRs and resolved IPs
           > $OUTPUT
           
-          # Function to resolve CNAMEs to IPs recursively
+          # Function to resolve CNAMEs to IPs recursively, avoiding loops
           resolve_cname() {
             local domain="$1"
             local resolved_ips=""
+            local cname=""
             
+            # Check if we've already resolved this domain to avoid infinite loops
+            if [[ " ${resolved_domains[@]} " =~ " ${domain} " ]]; then
+              echo "Already resolved: $domain"
+              return
+            fi
+            resolved_domains+=("$domain")  # Track the domain we've resolved
+
             # Attempt to resolve the domain to an IP address
             resolved_ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
             if [[ -z "$resolved_ips" ]]; then
-              # If no IPs found, check for CNAMEs and resolve them recursively
+              # If no IPs found, check for CNAMEs
               cname=$(dig +short CNAME "$domain" | grep -v "^\;")
               if [[ -n "$cname" ]]; then
                 echo "CNAME found for $domain -> $cname"
-                resolved_ips=$(resolve_cname "$cname")
+                resolved_ips=$(resolve_cname "$cname")  # Recursively resolve CNAME
               fi
             fi
             echo "$resolved_ips"  # Return resolved IPs or CNAMEs
           }
+
+          # Initialize an array to track resolved domains and avoid infinite loops
+          resolved_domains=()
 
           # Process each line from the input file
           grep -E '^HOST,|^IP-CIDR,' $INPUT | while IFS=',' read -r type value other; do
