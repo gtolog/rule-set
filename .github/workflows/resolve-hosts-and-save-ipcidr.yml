@@ -12,12 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      RESOLVER1: "223.5.5.5"
-      RESOLVER2: "119.29.29.29"
+      RESOLVERS: "223.5.5.5 119.29.29.29"  # List of resolvers as space-separated values
       INPUT: "DoH-elf.list"
       HOSTLIST: "host-list.txt"
-      IPCIDRLIST: "ipcidr-list.txt"
-      OUTPUT: "ipcidr.txt"
+      IPCIDRLIST_V4: "ipcidr-list-v4.txt"
+      IPCIDRLIST_V6: "ipcidr-list-v6.txt"
+      OUTPUT_V4: "output-ipcidr-v4.txt"
+      OUTPUT_V6: "output-ipcidr-v6.txt"
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
@@ -26,43 +27,63 @@ jobs:
         run: |
           # Create empty files for hostnames and IP-CIDRs
           > $HOSTLIST
-          > $IPCIDRLIST
+          > $IPCIDRLIST_V4
+          > $IPCIDRLIST_V6
           
           # Process each line from the input file
-          grep -E '^HOST,|^IP-CIDR,' $INPUT | while IFS=',' read -r type value other; do
+          grep -E '^HOST,|^IP-CIDR,|^IP-CIDR6,' $INPUT | while IFS=',' read -r type value other; do
             if [[ "$type" == "HOST" ]]; then
               # Save HOST directly to the file
               echo "$value" >> $HOSTLIST
               echo "Saved HOST: $value"
             elif [[ "$type" == "IP-CIDR" ]]; then
-              # Save IP-CIDR directly to the file
-              echo "$value" >> $IPCIDRLIST
+              # Save IP-CIDR directly to the IPv4 file
+              echo "$value" >> $IPCIDRLIST_V4
               echo "Saved IP-CIDR: $value"
+            elif [[ "$type" == "IP-CIDR6" ]]; then
+              # Save IP-CIDR directly to the IPv6 file
+              echo "$value" >> $IPCIDRLIST_V6
+              echo "Saved IP-CIDR6: $value"
             fi
           done
 
-      - name: Resolve DNS with dig
+      - name: Resolve DNS with dig using resolvers list
         run: |
-          echo "Resolving domains using dig..."
-          > resolved_ips.txt  # Create an empty file to store results
-        
-          # Read domains from the host-list.txt and resolve them using dig
+          echo "Resolving domains using dig with resolvers $RESOLVERS..."
+          > resolved_ips_v4.txt  # Create an empty file for IPv4 results
+          > resolved_ips_v6.txt  # Create an empty file for IPv6 results
+
+          # Convert resolvers to an array (space-separated list)
+          IFS=' ' read -r -a resolver_array <<< "$RESOLVERS"
+
+          # Read domains from host-list.txt and resolve them using each resolver
           while IFS= read -r domain; do
-            echo "Resolving $domain..."
-            # Resolve the domain and append IPs to resolved_ips.txt
-            dig +short $domain >> resolved_ips.txt
+            echo "Resolving $domain with resolvers ${resolver_array[@]}..."
+            # Resolve IPv4 addresses using each resolver
+            for resolver in "${resolver_array[@]}"; do
+              dig @$resolver +short $domain >> resolved_ips_v4.txt
+              dig @$resolver +short -t AAAA $domain >> resolved_ips_v6.txt
+            done
           done < $HOSTLIST
 
       - name: Process and extract IPs and CIDRs
         run: |
           echo "Processing resolved IPs and extracting CIDRs"
           
-          # Append resolved IPs to the IP-CIDR list
-          cat resolved_ips.txt >> $IPCIDRLIST
+          # Append resolved IPs to the respective IP-CIDR lists
+          cat resolved_ips_v4.txt >> $IPCIDRLIST_V4
+          cat resolved_ips_v6.txt >> $IPCIDRLIST_V6
 
-          # Also append the original IP-CIDR list
-          cat $IPCIDRLIST >> $OUTPUT
+          # Append original IP-CIDR list to output
+          cat $IPCIDRLIST_V4 >> $OUTPUT_V4
+          cat $IPCIDRLIST_V6 >> $OUTPUT_V6
 
           # Remove duplicates and sort the final list of IPs and CIDRs
-          sort -u $OUTPUT -o $OUTPUT  # Sort and remove duplicates in place
-          cat $OUTPUT  # Display the final result
+          sort -u $OUTPUT_V4 -o $OUTPUT_V4  # Sort and remove duplicates in place for IPv4
+          sort -u $OUTPUT_V6 -o $OUTPUT_V6  # Sort and remove duplicates in place for IPv6
+
+          # Display the final result
+          echo "IPv4 CIDRs:"
+          cat $OUTPUT_V4
+          echo "IPv6 CIDRs:"
+          cat $OUTPUT_V6
