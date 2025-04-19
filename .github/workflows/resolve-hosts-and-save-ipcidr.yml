@@ -152,8 +152,11 @@ jobs:
           # Stage the output files
           git add $OUTPUT_V4 $OUTPUT_V6
           
-          # Commit the changes
-          git commit -m "Update IP-CIDR output files"
-          
-          # Push the changes to the repository
-          git push origin main
+          # Check if there are changes to commit
+          if ! git diff --quiet; then
+            # Commit and push if there are changes
+            git commit -m "Update IP-CIDR output files"
+            git push origin main
+          else
+            echo "No changes detected, skipping commit and push."
+          fi
