@@ -19,6 +19,7 @@ jobs:
       IPCIDRLIST_V6: "ipcidr-list-v6.txt"
       OUTPUT_V4: "output-ipcidr-v4.txt"
       OUTPUT_V6: "output-ipcidr-v6.txt"
+      OUTPUT_DOMAIN_LIST: "DoH-elf-host.list"
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
@@ -29,12 +30,14 @@ jobs:
           > $HOSTLIST
           > $IPCIDRLIST_V4
           > $IPCIDRLIST_V6
+          > $OUTPUT_DOMAIN_LIST
           
           # Process each line from the input file
           grep -iE '^HOST,|^DOMAIN,|^IP-CIDR,|^IP-CIDR6,|^IP6-CIDR,' $INPUT | while IFS=',' read -r type value other; do
             if [[ "$type" == "HOST" ]] || [[ "$type" == "DOMAIN" ]]; then
               # Save HOST directly to the file
               echo "$value" >> $HOSTLIST
+              echo "HOST,$value" >> $OUTPUT_DOMAIN_LIST
               echo "Saved HOST: $value"
             elif [[ "$type" == "IP-CIDR" ]]; then
               # Save IP-CIDR directly to the IPv4 file
@@ -154,7 +157,7 @@ jobs:
           git config --global user.email "actions@github.com"
           
           # Stage the output files
-          git add $OUTPUT_V4 $OUTPUT_V6
+          git add $OUTPUT_V4 $OUTPUT_V6 $OUTPUT_DOMAIN_LIST
           
           # Check if there are changes to commit
           if ! git diff --quiet; then
