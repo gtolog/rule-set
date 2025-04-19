@@ -48,7 +48,7 @@ jobs:
         uses: projectdiscovery/dnsx-action@main
         with:
           list: ${{ github.workspace }}/$HOSTLIST  # Path to input file with domains
-          resolver: "$RESOLVER1,$RESOLVER2"  # Your resolvers
+          # resolver: "$RESOLVER1,$RESOLVER2"  # Your resolvers
           output: ${{ github.workspace }}/dnsx_output.txt  # Output file from dnsx
 
       - name: Process and extract IPs and CIDRs
