@@ -31,8 +31,8 @@ jobs:
           > $IPCIDRLIST_V6
           
           # Process each line from the input file
-          grep -iE '^HOST,|^IP-CIDR,|^IP-CIDR6,|^IP6-CIDR,' $INPUT | while IFS=',' read -r type value other; do
-            if [[ "$type" == "HOST" ]]; then
+          grep -iE '^HOST,|^DOMAIN,|^IP-CIDR,|^IP-CIDR6,|^IP6-CIDR,' $INPUT | while IFS=',' read -r type value other; do
+            if [[ "$type" == "HOST" ]] || [[ "$type" == "DOMAIN" ]]; then
               # Save HOST directly to the file
               echo "$value" >> $HOSTLIST
               echo "Saved HOST: $value"
