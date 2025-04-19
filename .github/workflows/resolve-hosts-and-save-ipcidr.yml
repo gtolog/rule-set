@@ -47,7 +47,7 @@ jobs:
             fi
           done
 
-      - name: Resolve DNS with dig using resolvers list (handling CNAMEs and errors)
+      - name: Resolve DNS with dig using resolvers list (handling CNAMEs, IPv6 errors)
         run: |
           echo "Resolving domains using dig with resolvers $RESOLVERS..."
           > resolved_ips_v4.txt  # Create an empty file for IPv4 results
@@ -63,10 +63,19 @@ jobs:
             # Resolve IPv4 addresses using each resolver
             for resolver in "${resolver_array[@]}"; do
               echo "Resolving $domain using resolver $resolver"
-              result=$(dig @$resolver +short $domain +time=5 +retry=3 || true)  # Add timeout and retries
-              if [[ -z "$result" ]]; then
-                echo "No IPv4 addresses found for $domain using resolver $resolver"
+              result=$(dig @$resolver +short $domain +time=5 +retry=3 || true)
+
+              # Check if the result is a CNAME
+              if [[ "$result" =~ \. ]]; then
+                # If it's a CNAME (i.e., not an IP), resolve the CNAME to IP addresses
+                cname_result=$(dig @$resolver +short $result +time=5 +retry=3 || true)
+                if [[ -n "$cname_result" ]]; then
+                  # If CNAME resolved to IP, append those to resolved_ips_v4.txt
+                  echo "$cname_result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
+                  echo "Found IPv4 addresses for CNAME $result: $cname_result"
+                fi
               else
+                # If result is an IP address, just append it
                 echo "$result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
                 echo "Found IPv4 addresses: $result"
               fi
@@ -75,12 +84,27 @@ jobs:
             # Similarly for IPv6
             for resolver in "${resolver_array[@]}"; do
               echo "Resolving $domain using resolver $resolver"
-              result=$(dig @$resolver +short -t AAAA $domain +time=5 +retry=3 || true)  # Add timeout and retries
+              result=$(dig @$resolver +short -t AAAA $domain +time=5 +retry=3 || true)
+
               if [[ -z "$result" ]]; then
                 echo "No IPv6 addresses found for $domain using resolver $resolver"
               else
-                echo "$result" | grep -E '^([0-9a-fA-F:]+)$' >> resolved_ips_v6.txt
-                echo "Found IPv6 addresses: $result"
+                # Check if the result is a CNAME
+                if [[ "$result" =~ \. ]]; then
+                  # If it's a CNAME, resolve the CNAME to IPv6 addresses
+                  cname_result=$(dig @$resolver +short -t AAAA $result +time=5 +retry=3 || true)
+                  if [[ -n "$cname_result" ]]; then
+                    # If CNAME resolved to IPv6, append those to resolved_ips_v6.txt
+                    echo "$cname_result" | grep -E '^([0-9a-fA-F:]+)$' >> resolved_ips_v6.txt
+                    echo "Found IPv6 addresses for CNAME $result: $cname_result"
+                  else
+                    echo "No IPv6 addresses found for CNAME $result using resolver $resolver"
+                  fi
+                else
+                  # If result is an IPv6 address, just append it
+                  echo "$result" | grep -E '^([0-9a-fA-F:]+)$' >> resolved_ips_v6.txt
+                  echo "Found IPv6 addresses: $result"
+                fi
               fi
             done
           done < $HOSTLIST
