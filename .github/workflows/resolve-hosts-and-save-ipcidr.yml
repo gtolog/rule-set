@@ -1,4 +1,4 @@
-name: Resolve
+name: resolve-hosts-and-save-ipcidr
 
 on:
   push:
@@ -15,6 +15,8 @@ jobs:
       RESOLVER1: "223.5.5.5"
       RESOLVER2: "119.29.29.29"
       INPUT: "DoH-elf.list"
+      HOSTLIST: "host-list.txt"
+      IPCIDRLIST: "ipcidr-list.txt"
       OUTPUT: "ipcidr.txt"
       
     steps:
@@ -23,17 +25,42 @@ jobs:
         with:
           go-version: 1.17
 
+      - name: Extract hostnames and IP-CIDRs
+        run: |
+          # Create empty files for hostnames and IP-CIDRs
+          > $HOSTLIST
+          > $IPCIDRLIST
+          
+          # Process each line from the input file
+          grep -E '^HOST,|^IP-CIDR,' $INPUT | while IFS=',' read -r type value other; do
+            if [[ "$type" == "HOST" ]]; then
+              # Save HOST directly to the file
+              echo "$value" >> $HOSTLIST
+              echo "Saved HOST: $value"
+            elif [[ "$type" == "IP-CIDR" ]]; then
+              # Save IP-CIDR directly to the file
+              echo "$value" >> $IPCIDRLIST
+              echo "Saved IP-CIDR: $value"
+            fi
+          done
+
       - name: Use dnsx to resolve domains
         uses: projectdiscovery/dnsx-action@main
         with:
-          input: ${{ github.workspace }}/$INPUT  # Path to input file with domains
+          list: ${{ github.workspace }}/$HOSTLIST  # Path to input file with domains
           resolvers: "$RESOLVER1,$RESOLVER2"  # Your resolvers
-          output: ${{ github.workspace }}/$OUTPUT  # Output file to save results
+          output: ${{ github.workspace }}/dnsx_output.txt  # Output file from dnsx
 
       - name: Process and extract IPs and CIDRs
         run: |
           echo "Processing resolved IPs and extracting CIDRs"
-          
+
+          # Append the dnsx output to ipcidr-list.txt
+          cat ${{ github.workspace }}/dnsx_output.txt >> ${{ github.workspace }}/$IPCIDRLIST
+
+          # Also append the IP-CIDR list directly from the original file
+          cat ${{ github.workspace }}/$IPCIDRLIST >> $OUTPUT
+
           # Remove duplicates and sort the final list of IPs and CIDRs
           sort -u $OUTPUT -o $OUTPUT  # Sort and remove duplicates in place
           cat $OUTPUT  # Display the final result
