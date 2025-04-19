@@ -47,7 +47,7 @@ jobs:
             fi
           done
 
-      - name: Resolve DNS with dig using resolvers list (handling CNAMEs, IPv6 errors)
+      - name: Resolve DNS with dig using resolvers list (handling resolution errors)
         run: |
           echo "Resolving domains using dig with resolvers $RESOLVERS..."
           > resolved_ips_v4.txt  # Create an empty file for IPv4 results
@@ -65,19 +65,25 @@ jobs:
               echo "Resolving $domain using resolver $resolver"
               result=$(dig @$resolver +short $domain +time=5 +retry=3 || true)
 
-              # Check if the result is a CNAME
-              if [[ "$result" =~ \. ]]; then
-                # If it's a CNAME (i.e., not an IP), resolve the CNAME to IP addresses
-                cname_result=$(dig @$resolver +short $result +time=5 +retry=3 || true)
-                if [[ -n "$cname_result" ]]; then
-                  # If CNAME resolved to IP, append those to resolved_ips_v4.txt
-                  echo "$cname_result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
-                  echo "Found IPv4 addresses for CNAME $result: $cname_result"
-                fi
+              if [[ -z "$result" ]]; then
+                echo "No IPv4 addresses found for $domain using resolver $resolver"
               else
-                # If result is an IP address, just append it
-                echo "$result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
-                echo "Found IPv4 addresses: $result"
+                # Check if the result is a CNAME
+                if [[ "$result" =~ \. ]]; then
+                  # If it's a CNAME, resolve the CNAME to IPv4 addresses
+                  cname_result=$(dig @$resolver +short $result +time=5 +retry=3 || true)
+                  if [[ -n "$cname_result" ]]; then
+                    # If CNAME resolved to IPv4, append those to resolved_ips_v4.txt
+                    echo "$cname_result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
+                    echo "Found IPv4 addresses for CNAME $result: $cname_result"
+                  else
+                    echo "No IPv4 addresses found for CNAME $result using resolver $resolver"
+                  fi
+                else
+                  # If result is an IPv4 address, just append it
+                  echo "$result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
+                  echo "Found IPv4 addresses: $result"
+                fi
               fi
             done
 
