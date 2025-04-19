@@ -19,9 +19,12 @@ jobs:
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
 
       - name: Use dnsx to resolve domains
-        uses: projectdiscovery/dnsx-action@v1
+        uses: projectdiscovery/dnsx-action@main
         with:
           input: ${{ github.workspace }}/$INPUT  # Path to input file with domains
           resolvers: "$RESOLVER1,$RESOLVER2"  # Your resolvers
