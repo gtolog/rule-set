@@ -63,7 +63,7 @@ jobs:
             # First, resolve IPv4 addresses using each resolver
             for resolver in "${resolver_array[@]}"; do
               echo "Resolving $domain using resolver $resolver"
-              result=$(dig @$resolver +short $domain)
+              result=$(dig @$resolver +short $domain || true)
               if [[ -z "$result" ]]; then
                 echo "No IPv4 addresses found for $domain using resolver $resolver"
               else
@@ -74,7 +74,7 @@ jobs:
             # Similarly for IPv6
             for resolver in "${resolver_array[@]}"; do
               echo "Resolving $domain using resolver $resolver"
-              result=$(dig @$resolver +short -t AAAA $domain)
+              result=$(dig @$resolver +short -t AAAA $domain || true)
               if [[ -z "$result" ]]; then
                 echo "No IPv6 addresses found for $domain using resolver $resolver"
               else
@@ -82,6 +82,10 @@ jobs:
               fi
             done
           done < $HOSTLIST
+
+          # Optionally log the final output for debugging
+          cat resolved_ips_v4.txt
+          cat resolved_ips_v6.txt
 
       - name: Process and extract IPs and CIDRs
         run: |
