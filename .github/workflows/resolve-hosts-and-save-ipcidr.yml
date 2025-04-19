@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
   schedule:
-    - cron: '0 16 * * *'
+    - cron: '0 10 * * *'
 
 jobs:
   resolve-hosts-and-save-ipcidr:
