@@ -52,6 +52,7 @@ jobs:
             fi
             resolved_domains+=("$domain")  # Track the domain we've resolved
 
+            echo "Resolving domain: $domain"
             # Attempt to resolve the domain to an IP address
             resolved_ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
             if [[ -z "$resolved_ips" ]]; then
@@ -62,6 +63,7 @@ jobs:
                 resolved_ips=$(resolve_cname "$cname")  # Recursively resolve CNAME
               fi
             fi
+            echo "Resolved IPs for $domain: $resolved_ips"
             echo "$resolved_ips"  # Return resolved IPs or CNAMEs
           }
 
