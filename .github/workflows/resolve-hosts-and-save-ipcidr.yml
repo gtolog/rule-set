@@ -1,0 +1,72 @@
+name: Resolve
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * *'
+
+jobs:
+  resolve-hosts-and-save-ipcidr:
+    runs-on: ubuntu-latest
+
+    env:
+      RESOLVER1: "223.5.5.5"
+      RESOLVER2: "119.29.29.29"
+      INPUT: "DoH-elf.list"
+      OUTPUT: "ipcidr.txt"
+      
+    steps:
+      - uses: actions/checkout@v3  # Checkout the repo
+
+      - name: Ensure dig is installed
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dnsutils
+
+      - name: Check for the input file
+        run: |
+          if [ ! -f "$INPUT" ]; then
+            echo "Input file $INPUT not found, please check if it's committed to the repository."
+            exit 1
+          fi
+
+      - name: Extract hostnames, resolve IPs, and extract IP-CIDRs
+        run: |
+          echo "Resolved IPs and Extracted IP-CIDRs:"
+          
+          # Create an empty file for IP-CIDRs and resolved IPs
+          > $OUTPUT
+          
+          # Process each line from the input file
+          grep -E '^HOST,|^IP-CIDR,' $INPUT | while IFS=',' read -r type value other; do
+            if [[ "$type" == "HOST" ]]; then
+              # Try resolving the hostname with two resolvers from environment variables
+              ips=""
+              for resolver in "$RESOLVER1" "$RESOLVER2"; do
+                # Get all available IPs for the domain
+                ips=$(dig @"$resolver" +short "$value")
+                if [[ -n "$ips" ]]; then
+                  break
+                fi
+              done
+              if [[ -n "$ips" ]]; then
+                # Save each resolved IP
+                for ip in $ips; do
+                  echo "$value -> $ip"
+                  echo "$ip" >> $OUTPUT  # Save resolved IP to ipcidr.txt
+                done
+              else
+                echo "$value -> No IP found"
+              fi
+            elif [[ "$type" == "IP-CIDR" ]]; then
+              # Save IP-CIDR directly to the file
+              echo "$value" >> $OUTPUT
+              echo "Saved IP-CIDR: $value"
+            fi
+          done
+          
+          # Show final contents of $OUTPUT
+          echo "Final IP-CIDR List (including resolved IPs):"
+          cat $OUTPUT
