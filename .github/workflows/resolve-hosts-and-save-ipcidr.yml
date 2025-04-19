@@ -47,7 +47,7 @@ jobs:
             fi
           done
 
-      - name: Resolve DNS with dig using resolvers list (handling CNAMEs)
+      - name: Resolve DNS with dig using resolvers list (handling CNAMEs and errors)
         run: |
           echo "Resolving domains using dig with resolvers $RESOLVERS..."
           > resolved_ips_v4.txt  # Create an empty file for IPv4 results
@@ -62,14 +62,24 @@ jobs:
             
             # First, resolve IPv4 addresses using each resolver
             for resolver in "${resolver_array[@]}"; do
-              # Resolve IPv4 and filter valid IP addresses (ignore CNAMEs)
-              dig @$resolver +short $domain | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
+              echo "Resolving $domain using resolver $resolver"
+              result=$(dig @$resolver +short $domain)
+              if [[ -z "$result" ]]; then
+                echo "No IPv4 addresses found for $domain using resolver $resolver"
+              else
+                echo "$result" | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
+              fi
             done
 
             # Similarly for IPv6
             for resolver in "${resolver_array[@]}"; do
-              # Resolve IPv6 and filter valid IP addresses (ignore CNAMEs)
-              dig @$resolver +short -t AAAA $domain | grep -E '^([0-9a-fA-F:]+)$' >> resolved_ips_v6.txt
+              echo "Resolving $domain using resolver $resolver"
+              result=$(dig @$resolver +short -t AAAA $domain)
+              if [[ -z "$result" ]]; then
+                echo "No IPv6 addresses found for $domain using resolver $resolver"
+              else
+                echo "$result" | grep -E '^([0-9a-fA-F:]+)$' >> resolved_ips_v6.txt
+              fi
             done
           done < $HOSTLIST
 
