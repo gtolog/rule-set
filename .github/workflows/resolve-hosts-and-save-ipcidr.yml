@@ -61,10 +61,11 @@ jobs:
             echo "Resolving $domain with resolvers ${resolver_array[@]}..."
             # Resolve IPv4 addresses using each resolver
             for resolver in "${resolver_array[@]}"; do
-              # Filter only valid IPv4 addresses (ignore CNAMEs)
-              dig @$resolver +short $domain | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' >> resolved_ips_v4.txt
-              # Resolve IPv6 addresses and filter out CNAMEs
-              dig @$resolver +short -t AAAA $domain | grep -E '^[0-9a-fA-F:]+$' >> resolved_ips_v6.txt
+              # Resolve IPv4 addresses and filter out non-IP results (including CNAMEs)
+              dig @$resolver +short $domain | grep -E '^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$' >> resolved_ips_v4.txt
+              
+              # Resolve IPv6 addresses and filter out non-IP results (including CNAMEs)
+              dig @$resolver +short -t AAAA $domain | grep -E '^([0-9a-fA-F:]+)$' >> resolved_ips_v6.txt
             done
           done < $HOSTLIST
 
