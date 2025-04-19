@@ -35,15 +35,18 @@ jobs:
       - name: Extract hostnames, resolve IPs, and extract IP-CIDRs
         run: |
           echo "Resolved IPs and Extracted IP-CIDRs:"
-          
+
           # Create an empty file for IP-CIDRs and resolved IPs
           > $OUTPUT
           
-          # Function to resolve CNAMEs to IPs recursively, avoiding loops
+          # Function to resolve CNAMEs to IPs recursively
           resolve_cname() {
             local domain="$1"
             local resolved_ips=""
             local cname=""
+            
+            # Log the domain being resolved
+            echo "Resolving domain: $domain"
             
             # Check if we've already resolved this domain to avoid infinite loops
             if [[ " ${resolved_domains[@]} " =~ " ${domain} " ]]; then
@@ -52,7 +55,6 @@ jobs:
             fi
             resolved_domains+=("$domain")  # Track the domain we've resolved
 
-            echo "Resolving domain: $domain"
             # Attempt to resolve the domain to an IP address
             resolved_ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
             if [[ -z "$resolved_ips" ]]; then
@@ -63,15 +65,19 @@ jobs:
                 resolved_ips=$(resolve_cname "$cname")  # Recursively resolve CNAME
               fi
             fi
+
+            # If still no IPs found, log and return empty
             if [[ -z "$resolved_ips" ]]; then
               echo "No IPs found for $domain"
               return
             fi
+
+            # Log and return resolved IPs
             echo "Resolved IPs for $domain: $resolved_ips"
-            echo "$resolved_ips"  # Return resolved IPs or CNAMEs
+            echo "$resolved_ips"  # Return resolved IPs
           }
 
-          # Initialize an array to track resolved domains and avoid infinite loops
+          # Initialize an array to track resolved domains to avoid infinite loops
           resolved_domains=()
 
           # Process each line from the input file
@@ -92,11 +98,14 @@ jobs:
                 for ip in $ips; do
                   # If it's a CNAME (ends with a dot), resolve it further
                   if [[ "$ip" =~ \.$ ]]; then
+                    echo "$value -> CNAME found, resolving further: $ip"
                     resolved_ips=$(resolve_cname "$ip")
                     # Store each resolved IP
                     for resolved_ip in $resolved_ips; do
-                      echo "$value -> $resolved_ip"
-                      echo "$resolved_ip" >> $OUTPUT
+                      if [[ -n "$resolved_ip" ]]; then
+                        echo "$value -> $resolved_ip"
+                        echo "$resolved_ip" >> $OUTPUT
+                      fi
                     done
                   else
                     echo "$value -> $ip"
