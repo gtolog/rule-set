@@ -142,3 +142,18 @@ jobs:
           cat $OUTPUT_V4
           echo "IPv6 CIDRs:"
           cat $OUTPUT_V6
+          
+      - name: Commit and push the changes
+        run: |
+          # Configure git with your name and email (use the GitHub Actions bot credentials)
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Stage the output files
+          git add $OUTPUT_V4 $OUTPUT_V6
+          
+          # Commit the changes
+          git commit -m "Update IP-CIDR output files"
+          
+          # Push the changes to the repository
+          git push origin main
