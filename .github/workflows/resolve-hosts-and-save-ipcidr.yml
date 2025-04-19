@@ -21,9 +21,18 @@ jobs:
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
+
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.20
+          go-version: 1.20  # Use a Go version that supports dnsx
+
+      - name: Install dnsx
+        run: |
+          # Install dnsx if not already installed
+          if [ ! -x /home/runner/go/bin/dnsx ]; then
+            echo "Installing dnsx..."
+            go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+          fi
 
       - name: Extract hostnames and IP-CIDRs
         run: |
@@ -45,11 +54,9 @@ jobs:
           done
 
       - name: Use dnsx to resolve domains
-        uses: projectdiscovery/dnsx-action@main
-        with:
-          list: ${{ github.workspace }}/$HOSTLIST  # Path to input file with domains
-          resolver: "$RESOLVER1,$RESOLVER2"  # Your resolvers
-          output: ${{ github.workspace }}/dnsx_output.txt  # Output file from dnsx
+        run: |
+          echo "Resolving domains with dnsx..."
+          /home/runner/go/bin/dnsx -l ${{ github.workspace }}/$HOSTLIST -r "$RESOLVER1,$RESOLVER2" -o ${{ github.workspace }}/dnsx_output.txt
 
       - name: Process and extract IPs and CIDRs
         run: |
