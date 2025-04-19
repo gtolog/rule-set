@@ -63,6 +63,10 @@ jobs:
                 resolved_ips=$(resolve_cname "$cname")  # Recursively resolve CNAME
               fi
             fi
+            if [[ -z "$resolved_ips" ]]; then
+              echo "No IPs found for $domain"
+              return
+            fi
             echo "Resolved IPs for $domain: $resolved_ips"
             echo "$resolved_ips"  # Return resolved IPs or CNAMEs
           }
