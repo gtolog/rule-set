@@ -20,108 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
 
-      - name: Ensure dig is installed
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y dnsutils
+      - name: Use dnsx to resolve domains
+        uses: projectdiscovery/dnsx-action@v1
+        with:
+          input: ${{ github.workspace }}/$INPUT  # Path to input file with domains
+          resolvers: "$RESOLVER1,$RESOLVER2"  # Your resolvers
+          output: ${{ github.workspace }}/$OUTPUT  # Output file to save results
 
-      - name: Check for the input file
+      - name: Process and extract IPs and CIDRs
         run: |
-          if [ ! -f "$INPUT" ]; then
-            echo "Input file $INPUT not found, please check if it's committed to the repository."
-            exit 1
-          fi
-
-      - name: Extract hostnames, resolve IPs, and extract IP-CIDRs
-        run: |
-          echo "Resolved IPs and Extracted IP-CIDRs:"
-
-          # Create an empty file for IP-CIDRs and resolved IPs
-          > $OUTPUT
+          echo "Processing resolved IPs and extracting CIDRs"
           
-          # Function to resolve CNAMEs to IPs recursively (with a limit to avoid infinite loops)
-          resolve_cname() {
-            local domain="$1"
-            local resolved_ips=""
-            local cname=""
-            
-            # Log the domain being resolved
-            echo "Resolving domain: $domain"
-            
-            # Check if we've already resolved this domain to avoid infinite loops
-            if [[ " ${resolved_domains[@]} " =~ " ${domain} " ]]; then
-              echo "Already resolved: $domain"
-              return
-            fi
-            resolved_domains+=("$domain")  # Track the domain we've resolved
-
-            # Attempt to resolve the domain to an IP address
-            resolved_ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
-            if [[ -z "$resolved_ips" ]]; then
-              # If no IPs found, check for CNAMEs
-              cname=$(dig +short CNAME "$domain" | grep -v "^\;")
-              if [[ -n "$cname" ]]; then
-                echo "CNAME found for $domain -> $cname"
-                resolved_ips=$(resolve_cname "$cname")  # Recursively resolve CNAME
-              fi
-            fi
-
-            # If still no IPs found, log and return empty
-            if [[ -z "$resolved_ips" ]]; then
-              echo "No IPs found for $domain"
-              return
-            fi
-
-            # Log and return resolved IPs
-            echo "Resolved IPs for $domain: $resolved_ips"
-            echo "$resolved_ips"  # Return resolved IPs
-          }
-
-          # Initialize an array to track resolved domains to avoid infinite loops
-          resolved_domains=()
-
-          # Process each line from the input file
-          grep -E '^HOST,|^IP-CIDR,' $INPUT | while IFS=',' read -r type value other; do
-            if [[ "$type" == "HOST" ]]; then
-              # Try resolving the hostname with two resolvers from environment variables
-              ips=""
-              for resolver in "$RESOLVER1" "$RESOLVER2"; do
-                # Get all available IPs for the domain
-                ips=$(dig @"$resolver" +short "$value" | grep -v "^\;")
-                if [[ -n "$ips" ]]; then
-                  break
-                fi
-              done
-
-              if [[ -n "$ips" ]]; then
-                # For each resolved IP, check if it's a CNAME and resolve it further
-                for ip in $ips; do
-                  # If it's a CNAME (ends with a dot), resolve it further
-                  if [[ "$ip" =~ \.$ ]]; then
-                    echo "$value -> CNAME found, resolving further: $ip"
-                    resolved_ips=$(resolve_cname "$ip")
-                    # Store each resolved IP
-                    for resolved_ip in $resolved_ips; do
-                      if [[ -n "$resolved_ip" ]]; then
-                        echo "$resolved_ip" >> $OUTPUT
-                      fi
-                    done
-                  else
-                    echo "$value -> $ip"
-                    echo "$ip" >> $OUTPUT
-                  fi
-                done
-              else
-                echo "$value -> No IP found"
-              fi
-            elif [[ "$type" == "IP-CIDR" ]]; then
-              # Save IP-CIDR directly to the file
-              echo "$value" >> $OUTPUT
-              echo "Saved IP-CIDR: $value"
-            fi
-          done
-          
-          # Remove duplicates and sort the final list of IPs
-          echo "Final IP-CIDR List (including resolved IPs):"
+          # Remove duplicates and sort the final list of IPs and CIDRs
           sort -u $OUTPUT -o $OUTPUT  # Sort and remove duplicates in place
-          cat $OUTPUT
+          cat $OUTPUT  # Display the final result
