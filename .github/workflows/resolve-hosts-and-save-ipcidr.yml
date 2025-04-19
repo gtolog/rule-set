@@ -42,22 +42,19 @@ jobs:
           # Function to resolve CNAMEs to IPs recursively
           resolve_cname() {
             local domain="$1"
-            # Start with empty IPs
-            local ips=""
-            # Try resolving the domain
-            ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
-            if [[ -z "$ips" ]]; then
-              # If no IPs found, check for CNAMEs
+            local resolved_ips=""
+            
+            # Attempt to resolve the domain to an IP address
+            resolved_ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
+            if [[ -z "$resolved_ips" ]]; then
+              # If no IPs found, check for CNAMEs and resolve them recursively
               cname=$(dig +short CNAME "$domain" | grep -v "^\;")
               if [[ -n "$cname" ]]; then
-                echo "CNAME found: $domain -> $cname"
-                # Recursively resolve the CNAME
-                resolve_cname "$cname"
+                echo "CNAME found for $domain -> $cname"
+                resolved_ips=$(resolve_cname "$cname")
               fi
-            else
-              # If IPs are found, return them
-              echo "$ips"
             fi
+            echo "$resolved_ips"  # Return resolved IPs or CNAMEs
           }
 
           # Process each line from the input file
@@ -74,11 +71,12 @@ jobs:
               done
 
               if [[ -n "$ips" ]]; then
-                # For each resolved IP, check if it's a CNAME and resolve it
+                # For each resolved IP, check if it's a CNAME and resolve it further
                 for ip in $ips; do
-                  # If it's a CNAME, resolve it further
-                  if [[ "$ip" =~ \.$ ]]; then  # Check if it's a CNAME (ends with a dot)
+                  # If it's a CNAME (ends with a dot), resolve it further
+                  if [[ "$ip" =~ \.$ ]]; then
                     resolved_ips=$(resolve_cname "$ip")
+                    # Store each resolved IP
                     for resolved_ip in $resolved_ips; do
                       echo "$value -> $resolved_ip"
                       echo "$resolved_ip" >> $OUTPUT
