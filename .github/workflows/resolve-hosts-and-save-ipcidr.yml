@@ -39,7 +39,7 @@ jobs:
           # Create an empty file for IP-CIDRs and resolved IPs
           > $OUTPUT
           
-          # Function to resolve CNAMEs to IPs recursively
+          # Function to resolve CNAMEs to IPs recursively (with a limit to avoid infinite loops)
           resolve_cname() {
             local domain="$1"
             local resolved_ips=""
