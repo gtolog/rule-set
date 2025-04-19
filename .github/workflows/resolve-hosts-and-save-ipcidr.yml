@@ -39,6 +39,27 @@ jobs:
           # Create an empty file for IP-CIDRs and resolved IPs
           > $OUTPUT
           
+          # Function to resolve CNAMEs to IPs recursively
+          resolve_cname() {
+            local domain="$1"
+            # Start with empty IPs
+            local ips=""
+            # Try resolving the domain
+            ips=$(dig +short "$domain" | grep -v "^\;")  # Exclude comments
+            if [[ -z "$ips" ]]; then
+              # If no IPs found, check for CNAMEs
+              cname=$(dig +short CNAME "$domain" | grep -v "^\;")
+              if [[ -n "$cname" ]]; then
+                echo "CNAME found: $domain -> $cname"
+                # Recursively resolve the CNAME
+                resolve_cname "$cname"
+              fi
+            else
+              # If IPs are found, return them
+              echo "$ips"
+            fi
+          }
+
           # Process each line from the input file
           grep -E '^HOST,|^IP-CIDR,' $INPUT | while IFS=',' read -r type value other; do
             if [[ "$type" == "HOST" ]]; then
@@ -46,16 +67,26 @@ jobs:
               ips=""
               for resolver in "$RESOLVER1" "$RESOLVER2"; do
                 # Get all available IPs for the domain
-                ips=$(dig @"$resolver" +short "$value")
+                ips=$(dig @"$resolver" +short "$value" | grep -v "^\;")
                 if [[ -n "$ips" ]]; then
                   break
                 fi
               done
+
               if [[ -n "$ips" ]]; then
-                # Save each resolved IP
+                # For each resolved IP, check if it's a CNAME and resolve it
                 for ip in $ips; do
-                  echo "$value -> $ip"
-                  echo "$ip" >> $OUTPUT  # Save resolved IP to ipcidr.txt
+                  # If it's a CNAME, resolve it further
+                  if [[ "$ip" =~ \.$ ]]; then  # Check if it's a CNAME (ends with a dot)
+                    resolved_ips=$(resolve_cname "$ip")
+                    for resolved_ip in $resolved_ips; do
+                      echo "$value -> $resolved_ip"
+                      echo "$resolved_ip" >> $OUTPUT
+                    done
+                  else
+                    echo "$value -> $ip"
+                    echo "$ip" >> $OUTPUT
+                  fi
                 done
               else
                 echo "$value -> No IP found"
@@ -67,6 +98,7 @@ jobs:
             fi
           done
           
-          # Show final contents of $OUTPUT
+          # Remove duplicates and sort the final list of IPs
           echo "Final IP-CIDR List (including resolved IPs):"
+          sort -u $OUTPUT -o $OUTPUT
           cat $OUTPUT
