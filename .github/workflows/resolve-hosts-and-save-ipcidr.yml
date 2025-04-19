@@ -100,5 +100,5 @@ jobs:
           
           # Remove duplicates and sort the final list of IPs
           echo "Final IP-CIDR List (including resolved IPs):"
-          sort -u $OUTPUT -o $OUTPUT
+          sort -u $OUTPUT -o $OUTPUT  # Sort and remove duplicates in place
           cat $OUTPUT
