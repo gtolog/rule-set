@@ -31,7 +31,7 @@ jobs:
           > $IPCIDRLIST_V6
           
           # Process each line from the input file
-          grep -E '^HOST,|^IP-CIDR,|^IP-CIDR6,' $INPUT | while IFS=',' read -r type value other; do
+          grep -iE '^HOST,|^IP-CIDR,|^IP-CIDR6,|^IP6-CIDR,' $INPUT | while IFS=',' read -r type value other; do
             if [[ "$type" == "HOST" ]]; then
               # Save HOST directly to the file
               echo "$value" >> $HOSTLIST
@@ -40,7 +40,7 @@ jobs:
               # Save IP-CIDR directly to the IPv4 file
               echo "$value" >> $IPCIDRLIST_V4
               echo "Saved IP-CIDR: $value"
-            elif [[ "$type" == "IP-CIDR6" ]]; then
+            elif [[ "$type" == "IP-CIDR6" ]] || [[ "$type" == "IP6-CIDR" ]]; then
               # Save IP-CIDR directly to the IPv6 file
               echo "$value" >> $IPCIDRLIST_V6
               echo "Saved IP-CIDR6: $value"
