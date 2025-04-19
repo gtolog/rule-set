@@ -103,7 +103,6 @@ jobs:
                     # Store each resolved IP
                     for resolved_ip in $resolved_ips; do
                       if [[ -n "$resolved_ip" ]]; then
-                        echo "$value -> $resolved_ip"
                         echo "$resolved_ip" >> $OUTPUT
                       fi
                     done
