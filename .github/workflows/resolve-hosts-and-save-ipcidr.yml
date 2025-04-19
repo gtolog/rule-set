@@ -21,9 +21,6 @@ jobs:
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.21  # Updated Go version to 1.20
 
       - name: Extract hostnames and IP-CIDRs
         run: |
@@ -44,22 +41,27 @@ jobs:
             fi
           done
 
-      - name: Use dnsx to resolve domains
-        uses: projectdiscovery/dnsx-action@main
-        with:
-          list: ${{ github.workspace }}/host-list.txt  # Path to input file with domains
-          # resolver: "$RESOLVER1,$RESOLVER2"  # Your resolvers
-          output: ${{ github.workspace }}/dnsx_output.txt  # Output file from dnsx
+      - name: Resolve DNS with dig
+        run: |
+          echo "Resolving domains using dig..."
+          > resolved_ips.txt  # Create an empty file to store results
+        
+          # Read domains from the host-list.txt and resolve them using dig
+          while IFS= read -r domain; do
+            echo "Resolving $domain..."
+            # Resolve the domain and append IPs to resolved_ips.txt
+            dig +short $domain >> resolved_ips.txt
+          done < $HOSTLIST
 
       - name: Process and extract IPs and CIDRs
         run: |
           echo "Processing resolved IPs and extracting CIDRs"
+          
+          # Append resolved IPs to the IP-CIDR list
+          cat resolved_ips.txt >> $IPCIDRLIST
 
-          # Append the dnsx output to ipcidr-list.txt
-          cat ${{ github.workspace }}/dnsx_output.txt >> ${{ github.workspace }}/$IPCIDRLIST
-
-          # Also append the IP-CIDR list directly from the original file
-          cat ${{ github.workspace }}/$IPCIDRLIST >> $OUTPUT
+          # Also append the original IP-CIDR list
+          cat $IPCIDRLIST >> $OUTPUT
 
           # Remove duplicates and sort the final list of IPs and CIDRs
           sort -u $OUTPUT -o $OUTPUT  # Sort and remove duplicates in place
