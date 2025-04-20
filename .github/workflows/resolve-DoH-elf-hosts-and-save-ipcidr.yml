@@ -1,4 +1,4 @@
-name: resolve-hosts-and-save-ipcidr
+name: resolve-DoH-elf-hosts-and-save-ipcidr
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     - cron: '0 10 * * *'
 
 jobs:
-  resolve-hosts-and-save-ipcidr:
+  resolve-DoH-elf-hosts-and-save-ipcidr:
     runs-on: ubuntu-latest
 
     env:
@@ -49,9 +49,6 @@ jobs:
               echo "Saved IP-CIDR6: $value"
             fi
           done
-
-          echo "DoHelf HOSTs:"
-          cat $OUTPUT_DOMAIN_LIST
 
       - name: Resolve DNS with dig using resolvers list (handling resolution errors)
         run: |
@@ -122,10 +119,10 @@ jobs:
           done < $HOSTLIST
 
           # Optionally log the final output for debugging
-          echo "Final resolved IPv4 addresses:"
-          cat resolved_ips_v4.txt
-          echo "Final resolved IPv6 addresses:"
-          cat resolved_ips_v6.txt
+          # echo "Final resolved IPv4 addresses:"
+          # cat resolved_ips_v4.txt
+          # echo "Final resolved IPv6 addresses:"
+          # cat resolved_ips_v6.txt
 
       - name: Process and extract IPs and CIDRs
         run: |
