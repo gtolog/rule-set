@@ -35,7 +35,7 @@ def read_list_from_url(url):
             if response.status_code == 200:
                 # Read CSV data from the URL
                 csv_data = StringIO(response.text)
-                df = pd.read_csv(csv_data, header=None, on_bad_lines='skip')
+                df = pd.read_csv(csv_data, header=None, names=['pattern', 'address', 'other', 'other2', 'other3'], on_bad_lines='skip')
                 print(f"Successfully fetched CSV data from URL: {link}")
             else:
                 print(f"Failed to fetch CSV from URL: {link}, Status code: {response.status_code}")
@@ -49,7 +49,7 @@ def read_list_from_url(url):
             print(f"Reading local file: {link}")
             try:
                 # Simply read the local file directly into a DataFrame
-                df = pd.read_csv(link, header=None, on_bad_lines='skip')  # Automatically handle columns
+                df = pd.read_csv(link, header=None, names=['pattern', 'address', 'other', 'other2', 'other3'], on_bad_lines='skip')
                 print(f"Successfully read CSV data from local file: {link}")
             except Exception as e:
                 print(f"Error reading file {link}: {e}")
