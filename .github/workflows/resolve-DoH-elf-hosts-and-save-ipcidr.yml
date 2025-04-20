@@ -103,7 +103,7 @@ jobs:
             # Similarly for IPv6
             for resolver in "${resolver_array[@]}"; do
               echo "Resolving $domain using resolver $resolver"
-              result=$(dig @$resolver +short -t AAAA $domain +time=5 +retry=3 || true)
+              result=$(dig @$resolver +subnet=240e:382:1c:9100::/56 +short -t AAAA $domain +time=5 +retry=3 || true)
             
               echo "Result:"
               echo $result
@@ -120,7 +120,7 @@ jobs:
                     echo "Found IPv6 address: $ip"
                   else
                     # If it's not an IP address, assume it's a CNAME and resolve further
-                    cname_result=$(dig @$resolver +short -t AAAA $ip +time=5 +retry=3 || true)
+                    cname_result=$(dig @$resolver +subnet=240e:382:1c:9100::/56 +short -t AAAA $ip +time=5 +retry=3 || true)
                     if [[ -n "$cname_result" ]]; then
                       # If CNAME resolved to IPv6, append those to resolved_ips_v6.txt
                       for cname_ip in $cname_result; do
