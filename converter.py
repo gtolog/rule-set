@@ -171,18 +171,21 @@ def parse_list_file(link, output_directory):
         print(f'获取链接出错，已跳过：{link}，原因：{str(e)}')
         pass
 
-# Create the parser
-parser = argparse.ArgumentParser(description="Process a list of links.")
 
-# Add an argument for links (can accept multiple links)
-parser.add_argument('links', metavar='L', type=str, nargs='+', 
-                    help='List of links to process (space separated)')
+# Check if the environment variable is set
+links = os.getenv('LIST-TO-BE-CONVERTED', '').split()
 
-# Parse the arguments
-args = parser.parse_args()
+if not links:
+    # If no links are found in the environment variable, use argparse to fall back to command-line arguments
+    parser = argparse.ArgumentParser(description="Process a list of links.")
+    parser.add_argument('links', metavar='L', type=str, nargs='+', 
+                        help='List of links to process (space separated)')
+    args = parser.parse_args()
+    links = args.links
 
-# Get the links from the command-line arguments
-links = args.links
+# Now links will contain either the environment variable or the command-line arguments
+output_dir = "./"
+result_file_names = []
 
 for link in links:
     result_file_name = parse_list_file(link, output_directory=output_dir)
