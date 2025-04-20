@@ -17,7 +17,14 @@ MAP_DICT = {'DOMAIN-SUFFIX': 'domain_suffix', 'HOST-SUFFIX': 'domain_suffix', 'h
             'SRC-PORT': 'source_port', "URL-REGEX": "domain_regex", "DOMAIN-REGEX": "domain_regex"}
 
 def read_yaml_from_url(url):
-    headers = {'User-Agent': 'Mozilla/5.0'}
+     headers = {'User-Agent': 'Mozilla/5.0'}
+     response = requests.get(url, headers=headers)
+     response.raise_for_status()
+     yaml_data = yaml.safe_load(response.text)
+     return yaml_data
+
+def read_list_from_url(url):
+     headers = {'User-Agent': 'Mozilla/5.0'}
     
     # Check if the link is a valid URL
     if link.startswith(('http://', 'https://')):
@@ -52,6 +59,7 @@ def read_yaml_from_url(url):
         else:
             print(f"Invalid URL or file path: {link}")
             return None
+
     filtered_rows = []
     rules = []
     # 处理逻辑规则
