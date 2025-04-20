@@ -18,19 +18,40 @@ MAP_DICT = {'DOMAIN-SUFFIX': 'domain_suffix', 'HOST-SUFFIX': 'domain_suffix', 'h
 
 def read_yaml_from_url(url):
     headers = {'User-Agent': 'Mozilla/5.0'}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    yaml_data = yaml.safe_load(response.text)
-    return yaml_data
-
-def read_list_from_url(url):
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        csv_data = StringIO(response.text)
-        df = pd.read_csv(csv_data, header=None, names=['pattern', 'address', 'other', 'other2', 'other3'], on_bad_lines='skip')
+    
+    # Check if the link is a valid URL
+    if link.startswith(('http://', 'https://')):
+        print(f"Requesting URL: {link}")
+        try:
+            response = requests.get(link, headers=headers)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            if response.status_code == 200:
+                # Read CSV data from the URL
+                csv_data = StringIO(response.text)
+                df = pd.read_csv(csv_data, header=None, names=['pattern', 'address', 'other', 'other2', 'other3'], on_bad_lines='skip')
+                print(f"Successfully fetched CSV data from URL: {link}")
+                return df
+            else:
+                print(f"Failed to fetch CSV from URL: {link}, Status code: {response.status_code}")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching URL {link}: {e}")
+            return None
     else:
-        return None
+        # If it's a file, check if the file exists
+        if os.path.isfile(link):
+            print(f"Reading local file: {link}")
+            try:
+                # Simply read the local file directly into a DataFrame
+                df = pd.read_csv(link, header=None, names=['pattern', 'address', 'other', 'other2', 'other3'], on_bad_lines='skip')
+                print(f"Successfully read CSV data from local file: {link}")
+                return df
+            except Exception as e:
+                print(f"Error reading file {link}: {e}")
+                return None
+        else:
+            print(f"Invalid URL or file path: {link}")
+            return None
     filtered_rows = []
     rules = []
     # 处理逻辑规则
