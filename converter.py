@@ -17,10 +17,21 @@ MAP_DICT = {'DOMAIN-SUFFIX': 'domain_suffix', 'HOST-SUFFIX': 'domain_suffix', 'h
             'SRC-PORT': 'source_port', "URL-REGEX": "domain_regex", "DOMAIN-REGEX": "domain_regex"}
 
 def read_yaml_from_url(url):
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    yaml_data = yaml.safe_load(response.text)
+    if link.startswith(('http://', 'https://')):
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        yaml_data = yaml.safe_load(response.text)
+    else:
+        if os.path.isfile(link):
+            try:
+                # Read the local file directly and load it as YAML
+                with open(link, 'r') as file:
+                    yaml_data = yaml.safe_load(file)
+                    return yaml_data
+            except Exception as e:
+                print(f"Error reading YAML file {link}: {e}")
+                return None
     return yaml_data
 
 def read_list_from_url(url):
