@@ -8,7 +8,7 @@ on:
       - completed
 
 env:
-  LIST-TO-BE-CONVERTED: "https://raw.githubusercontent.com/gtolog/rule-set/refs/heads/main/DoH-elf-host.list"
+  LIST-TO-BE-CONVERTED: "DoH-elf-host.list DoH-public.list"
 
 jobs:
   convert-list-to-sys:
