@@ -50,6 +50,9 @@ jobs:
             fi
           done
 
+          echo "DoHelf HOSTs:"
+          cat $OUTPUT_DOMAIN_LIST
+
       - name: Resolve DNS with dig using resolvers list (handling resolution errors)
         run: |
           echo "Resolving domains using dig with resolvers $RESOLVERS..."
@@ -160,7 +163,7 @@ jobs:
           git add $OUTPUT_V4 $OUTPUT_V6 $OUTPUT_DOMAIN_LIST
           
           # Check if there are changes to commit
-          if ! git diff --quiet; then
+          if ! git diff --staged --quiet; then
             # Commit and push if there are changes
             git commit -m "Update IP-CIDR output files"
             git push origin main
