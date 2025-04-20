@@ -8,7 +8,7 @@ on:
       - completed
 
 env:
-  LIST-TO-BE-CONVERTED: "DoH-elf-host.list DoH-public.list gto-proxy.list gto-direct.list"
+  LIST-TO-BE-CONVERTED: "DoH-elf-host.list DoH-elf.list DoH-public.list gto-proxy.list gto-direct.list"
 
 jobs:
   convert-list-to-sys:
