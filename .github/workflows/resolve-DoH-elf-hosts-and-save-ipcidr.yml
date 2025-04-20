@@ -68,6 +68,9 @@ jobs:
               echo "Resolving $domain using resolver $resolver"
               result=$(dig @$resolver +subnet=114.114.114.114/24 +short $domain +time=5 +retry=3 || true)
 
+              echo "Result:"
+              echo $result
+
               if [[ -z "$result" ]]; then
                 echo "No IPv4 addresses found for $domain using resolver $resolver"
               else
