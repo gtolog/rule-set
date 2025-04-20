@@ -2,6 +2,9 @@ name: resolve-DoH-elf-hosts-and-save-ipcidr
 
 on:
   workflow_dispatch:
+  push:
+  schedule:
+    - cron: "0 9 * * *"
 
 jobs:
   resolve-DoH-elf-hosts-and-save-ipcidr:
