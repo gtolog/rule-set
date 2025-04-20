@@ -17,8 +17,8 @@ jobs:
       HOSTLIST: "host-list.txt"
       IPCIDRLIST_V4: "ipcidr-list-v4.txt"
       IPCIDRLIST_V6: "ipcidr-list-v6.txt"
-      OUTPUT_V4: "output-ipcidr-v4.txt"
-      OUTPUT_V6: "output-ipcidr-v6.txt"
+      OUTPUT_V4: "DoH-elf-ipcidr-v4.txt"
+      OUTPUT_V6: "DoH-elf-ipcidr-v6.txt"
       OUTPUT_DOMAIN_LIST: "DoH-elf-host.list"
       
     steps:
