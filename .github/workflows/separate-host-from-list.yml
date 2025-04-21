@@ -1,0 +1,64 @@
+name: split-host-and-ipcidr
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'gto-proxy.list'
+      - 'gto-direct.list'
+  schedule:
+    - cron: "0 9 * * *"  # Every day at 9 AM UTC
+
+jobs:
+  split-host-and-ipcidr:
+    runs-on: ubuntu-latest
+
+    env:
+      INPUTS: "gto-proxy.list gto-direct.list"
+      OUTPUT_DIR: "${{ github.workspace }}/Quantumult-X"
+      
+    steps:
+      - uses: actions/checkout@v3  # Checkout the repo
+
+      - name: Extract hostnames
+        run: |
+          # Convert inputs to an array (space-separated list)
+          IFS=' ' read -r -a input_array <<< "$INPUTS"
+
+          mkdir -p "$OUTPUT_DIR"
+
+          # Loop through each input file
+          for input in "${input_array[@]}"; do
+            # Get the base name of the file (without the extension)
+            basename_no_extension=$(basename "${input%.*}")
+
+            # Create an empty file for hostnames (ensure the file is empty)
+            > "$OUTPUT_DIR/${basename_no_extension}-host.list"
+
+            # Process each line from the input file
+            grep -iE '^HOST,|^DOMAIN,' $input | while IFS=',' read -r type value other; do
+              if [[ "$type" == "HOST" ]] || [[ "$type" == "DOMAIN" ]]; then
+                # Save HOST or DOMAIN directly to the file
+                echo "$value" >> "$OUTPUT_DIR/${basename_no_extension}-host.list"
+                echo "Saved HOST: $value"
+              fi
+            done
+          done
+          
+      - name: Commit and push the changes
+        run: |
+          # Configure git with your name and email (use the GitHub Actions bot credentials)
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Stage the output files
+          git add "$OUTPUT_DIR"/*-host.list
+          
+          # Check if there are changes to commit
+          if ! git diff --staged --quiet; then
+            # Commit and push if there are changes
+            git commit -m "Separate hostnames from the list"
+            git push origin main
+          else
+            echo "No changes detected, skipping commit and push."
+          fi
