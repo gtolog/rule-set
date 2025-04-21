@@ -1,4 +1,4 @@
-name: split-host-from-list
+name: separate-host-from-list
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ on:
     - cron: "0 9 * * *"  # Every day at 9 AM UTC
 
 jobs:
-  split-host-from-list:
+  separate-host-from-list:
     runs-on: ubuntu-latest
 
     env:
