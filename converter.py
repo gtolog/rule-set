@@ -222,7 +222,7 @@ if not links:
     links = args.links
 
 # Now links will contain either the environment variable or the command-line arguments
-output_dir = "./"
+output_dir = os.getenv('OUTPUT-DIR')
 result_file_names = []
 
 for link in links:
