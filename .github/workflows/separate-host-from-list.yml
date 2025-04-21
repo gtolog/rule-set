@@ -1,4 +1,4 @@
-name: split-host-and-ipcidr
+name: split-host-from-list
 
 on:
   workflow_dispatch:
@@ -6,15 +6,17 @@ on:
     paths:
       - 'gto-proxy.list'
       - 'gto-direct.list'
+      - 'DoH-elf.list'
+      - 'DoH-public.list'
   schedule:
     - cron: "0 9 * * *"  # Every day at 9 AM UTC
 
 jobs:
-  split-host-and-ipcidr:
+  split-host-from-list:
     runs-on: ubuntu-latest
 
     env:
-      INPUTS: "gto-proxy.list gto-direct.list"
+      INPUTS: "gto-proxy.list gto-direct.list DoH-elf.list DoH-public.list"
       OUTPUT_DIR: "${{ github.workspace }}/Quantumult-X"
       
     steps:
