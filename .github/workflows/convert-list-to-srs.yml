@@ -9,6 +9,7 @@ on:
 
 env:
   LIST-TO-BE-CONVERTED: "DoH-elf-host.list DoH-elf.list DoH-public.list gto-proxy.list gto-direct.list"
+  OUTPUT-DIR: "${{ github.workspace }}/sing-box"
 
 jobs:
   convert-list-to-sys:
@@ -34,17 +35,19 @@ jobs:
           sudo dpkg -i sing-box.deb
 
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
         
     - name: convert list
-      run: python converter.py
+      run: |
+        mkdir -p $(dirname "$OUTPUT-DIR")
+        python converter.py
 
     - name: commit and push
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        git add *.json
-        git add *.srs
+        git add $OUTPUT-DIR/*.json
+        git add $OUTPUT-DIR/*.srs
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
