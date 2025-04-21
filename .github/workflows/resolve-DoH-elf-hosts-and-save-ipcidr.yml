@@ -66,7 +66,7 @@ jobs:
             # Resolve IPv4 addresses
             for resolver in "${resolver_array[@]}"; do
               echo "Resolving $domain using resolver $resolver"
-              result=$(dig @$resolver +subnet=114.114.114.114/24 +short $domain +time=5 +retry=3 || true)
+              result=$(dig @$resolver +subnet=175.10.34.1/24 +short $domain +time=5 +retry=3 || true)
             
               echo "Result:"
               echo $result
@@ -83,7 +83,7 @@ jobs:
                     echo "Found IPv4 address: $ip"
                   else
                     # If it's not an IP address, assume it's a CNAME and resolve further
-                    cname_result=$(dig @$resolver +subnet=114.114.114.114/24 +short $ip +time=5 +retry=3 || true)
+                    cname_result=$(dig @$resolver +subnet=175.10.34.1/24 +short $ip +time=5 +retry=3 || true)
                     if [[ -n "$cname_result" ]]; then
                       # If CNAME resolved to IPv4, append those to resolved_ips_v4.txt
                       for cname_ip in $cname_result; do
