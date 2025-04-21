@@ -187,7 +187,7 @@ jobs:
           # Check if there are changes to commit
           if ! git diff --staged --quiet; then
             # Commit and push if there are changes
-            git commit -m "Update IP-CIDR output files"
+            git commit -m "resolve hosts to ip in DoH-elf.list, seperate hosts in DoH-elf.list to DoH-elf-host.list"
             git push origin main
           else
             echo "No changes detected, skipping commit and push."
