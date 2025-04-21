@@ -12,6 +12,8 @@ HOST-SUFFIX,imgflip.com
 HOST-SUFFIX,brew.sh
 HOST-SUFFIX,kernel.org
 HOST-SUFFIX,arin.net
+HOST-SUFFIX,opensubtitles.com
+HOST-SUFFIX,omdbapi.com
 HOST-SUFFIX,tubi.tv
 HOST-SUFFIX,tubitv.com
 HOST-SUFFIX,tubi.io
