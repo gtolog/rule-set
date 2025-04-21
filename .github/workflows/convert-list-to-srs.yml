@@ -9,7 +9,7 @@ on:
 
 env:
   LIST-TO-BE-CONVERTED: "DoH-elf-host.list DoH-elf.list DoH-public.list gto-proxy.list gto-direct.list"
-  OUTPUT-DIR: "${{ github.workspace }}/sing-box"
+  OUTPUT-DIR: "${{ github.workspace }}/sing-box/"
 
 jobs:
   convert-list-to-sys:
@@ -39,7 +39,7 @@ jobs:
         
     - name: convert list
       run: |
-        mkdir -p $(dirname "$OUTPUT-DIR")
+        mkdir -p "$OUTPUT-DIR"
         python converter.py
 
     - name: commit and push
