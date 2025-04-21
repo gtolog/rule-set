@@ -39,7 +39,7 @@ jobs:
         
     - name: convert list
       run: |
-        mkdir -p "$OUTPUT-DIR"
+        mkdir -p "$OUTPUT_DIR"
         python converter.py
 
     - name: commit and push
