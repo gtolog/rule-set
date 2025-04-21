@@ -20,7 +20,7 @@ jobs:
       IPCIDRLIST_V6: "ipcidr-list-v6.txt"
       OUTPUT_V4: "${{ github.workspace }}/ipcidr/DoH-elf-ipcidr-v4.txt"
       OUTPUT_V6: "${{ github.workspace }}/ipcidr/DoH-elf-ipcidr-v6.txt"
-      OUTPUT_DOMAIN_LIST: "${{ github.workspace }}/DoH-elf-host.list"
+      OUTPUT_DOMAIN_LIST: "${{ github.workspace }}/Quantumult-X/DoH-elf-host.list"
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
