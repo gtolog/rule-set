@@ -16,15 +16,19 @@ jobs:
       HOSTLIST: "host-list.txt"
       IPCIDRLIST_V4: "ipcidr-list-v4.txt"
       IPCIDRLIST_V6: "ipcidr-list-v6.txt"
-      OUTPUT_V4: "./ipcidr/DoH-elf-ipcidr-v4.txt"
-      OUTPUT_V6: "./ipcidr/DoH-elf-ipcidr-v6.txt"
-      OUTPUT_DOMAIN_LIST: "DoH-elf-host.list"
+      OUTPUT_V4: "${{ github.workspace }}/ipcidr/DoH-elf-ipcidr-v4.txt"
+      OUTPUT_V6: "${{ github.workspace }}/ipcidr/DoH-elf-ipcidr-v6.txt"
+      OUTPUT_DOMAIN_LIST: "${{ github.workspace }}/DoH-elf-host.list"
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
 
       - name: Extract hostnames and IP-CIDRs
         run: |
+          mkdir -p $(dirname "$OUTPUT_V4")
+          mkdir -p $(dirname "$OUTPUT_V6")
+          mkdir -p $(dirname "$OUTPUT_DOMAIN_LIST")
+          
           # Create empty files for hostnames and IP-CIDRs
           > $HOSTLIST
           > $IPCIDRLIST_V4
@@ -160,8 +164,8 @@ jobs:
           sort -u $OUTPUT_V6 -o $OUTPUT_V6  # Sort and remove duplicates in place for IPv6
 
           # Add a new line at the end of OUTPUT_V4 and OUTPUT_V6
-          #echo "" >> $OUTPUT_V4  # Add a new line to the end of OUTPUT_V4
-          #echo "" >> $OUTPUT_V6  # Add a new line to the end of OUTPUT_V6
+          echo "" >> $OUTPUT_V4  # Add a new line to the end of OUTPUT_V4
+          echo "" >> $OUTPUT_V6  # Add a new line to the end of OUTPUT_V6
 
           # Display the final result
           echo "IPv4 CIDRs:"
