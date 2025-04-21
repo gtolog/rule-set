@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "domain_suffix": [
+        "canyouseeme.org",
+        "ipwhois.io",
+        "m-team.cc",
+        "m-team.io",
+        "test-ipv6.com"
+      ]
+    }
+  ],
+  "version": 2
+}

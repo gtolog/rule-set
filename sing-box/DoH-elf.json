@@ -1,0 +1,43 @@
+{
+  "rules": [
+    {
+      "domain": [
+        "aedns.weixin.qq.com",
+        "dns.iqiyi.com",
+        "dns.qiyipic.iqiyi.com",
+        "dns.weixin.qq.com",
+        "dns.weixin.qq.com.cn",
+        "dnspod.meituan.httpdns.qcloud.com",
+        "doh.iqiyi.com",
+        "hcdnl.pull302.gslb.livehwc3.cn",
+        "httpdns.baidu.com",
+        "httpdns.baidubce.com",
+        "httpdns.bcelive.com",
+        "httpdns.meituan.com",
+        "httpdns.n.shifen.com",
+        "httpdnsmultiapi.meituan.com",
+        "httpdnsmultiapivip.meituan.com",
+        "httpsdns.baidu.com",
+        "paydns.weixin.qq.com",
+        "resolvers-cn.httpdns.aliyuncs.com"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "101.35.204.35/32",
+        "101.35.212.35/32",
+        "103.37.155.60/32",
+        "103.41.167.237/32",
+        "114.110.96.26/32",
+        "114.110.96.6/32",
+        "114.110.97.30/32",
+        "114.110.97.97/32",
+        "121.5.84.85/32",
+        "202.90.108.13/32",
+        "202.90.110.46/32",
+        "81.69.130.131/32"
+      ]
+    }
+  ],
+  "version": 2
+}
