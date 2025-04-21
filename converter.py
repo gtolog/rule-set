@@ -211,7 +211,7 @@ def parse_list_file(link, output_directory):
 
 
 # Check if the environment variable is set
-links = os.getenv('LIST-TO-BE-CONVERTED', '').split()
+links = os.getenv('LIST_TO_BE_CONVERTED', '').split()
 
 if not links:
     # If no links are found in the environment variable, use argparse to fall back to command-line arguments
@@ -222,7 +222,7 @@ if not links:
     links = args.links
 
 # Now links will contain either the environment variable or the command-line arguments
-output_dir = os.getenv('OUTPUT-DIR')
+output_dir = os.getenv('OUTPUT_DIR')
 result_file_names = []
 
 for link in links:
