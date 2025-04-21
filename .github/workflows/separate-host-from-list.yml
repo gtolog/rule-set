@@ -38,10 +38,10 @@ jobs:
             > "$OUTPUT_DIR/${basename_no_extension}-host.list"
 
             # Process each line from the input file
-            grep -iE '^HOST,|^DOMAIN,' $input | while IFS=',' read -r type value other; do
-              if [[ "$type" == "HOST" ]] || [[ "$type" == "DOMAIN" ]]; then
+            grep -iE '^HOST,|^DOMAIN,|^HOST-SUFFIX,' $input | while IFS=',' read -r type value other; do
+              if [[ "$type" == "HOST" ]] || [[ "$type" == "DOMAIN" ]] || [[ "$type" == "HOST-SUFFIX" ]]; then
                 # Save HOST or DOMAIN directly to the file
-                echo "$value" >> "$OUTPUT_DIR/${basename_no_extension}-host.list"
+                echo "${{ type }},${{ value }}" >> "$OUTPUT_DIR/${basename_no_extension}-host.list"
                 echo "Saved HOST: $value"
               fi
             done
