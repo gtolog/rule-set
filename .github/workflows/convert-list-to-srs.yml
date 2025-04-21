@@ -8,7 +8,6 @@ on:
       - completed
 
 env:
-  LIST_TO_BE_CONVERTED: "DoH-elf-host.list DoH-elf.list DoH-public.list gto-proxy.list gto-direct.list"
   OUTPUT_DIR: "${{ github.workspace }}/sing-box"
 
 jobs:
@@ -36,7 +35,15 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v3
-        
+
+    - name: Find all *.list files
+      id: find_list_files
+      run: |
+        # Find all *.list files recursively in the repository and store them in LIST_TO_BE_CONVERTED
+        LIST_TO_BE_CONVERTED=$(find $GITHUB_WORKSPACE -type f -name "*.list" | tr '\n' ' ')
+        echo "Found the following *.list files: $LIST_TO_BE_CONVERTED"
+        echo "LIST_TO_BE_CONVERTED=$LIST_TO_BE_CONVERTED" >> $GITHUB_ENV
+
     - name: convert list
       run: |
         mkdir -p "$OUTPUT_DIR"
