@@ -165,10 +165,6 @@ jobs:
           sort -u $OUTPUT_V4 -o $OUTPUT_V4  # Sort and remove duplicates in place for IPv4
           sort -u $OUTPUT_V6 -o $OUTPUT_V6  # Sort and remove duplicates in place for IPv6
 
-          # Add a new line at the end of OUTPUT_V4 and OUTPUT_V6
-          echo "" >> $OUTPUT_V4  # Add a new line to the end of OUTPUT_V4
-          echo "" >> $OUTPUT_V6  # Add a new line to the end of OUTPUT_V6
-
           # Display the final result
           echo "IPv4 CIDRs:"
           cat $OUTPUT_V4
