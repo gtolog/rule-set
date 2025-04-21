@@ -8,8 +8,8 @@ on:
       - completed
 
 env:
-  LIST-TO-BE-CONVERTED: "DoH-elf-host.list DoH-elf.list DoH-public.list gto-proxy.list gto-direct.list"
-  OUTPUT-DIR: "${{ github.workspace }}/sing-box/"
+  LIST_TO_BE_CONVERTED: "DoH-elf-host.list DoH-elf.list DoH-public.list gto-proxy.list gto-direct.list"
+  OUTPUT_DIR: "${{ github.workspace }}/sing-box"
 
 jobs:
   convert-list-to-sys:
@@ -46,8 +46,8 @@ jobs:
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        git add $OUTPUT-DIR/*.json
-        git add $OUTPUT-DIR/*.srs
+        git add $OUTPUT_DIR/*.json
+        git add $OUTPUT_DIR/*.srs
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
