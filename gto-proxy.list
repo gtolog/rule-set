@@ -64,3 +64,7 @@ IP-CIDR,107.151.8.2/24,GTO-PROXY
 
 # openai and grok
 HOST-SUFFIX,featureassets.org,GTO-PROXY
+
+# amazon
+HOST-SUFFIX,arkoselabs.com,GTO-PROXY
+HOST-SUFFIX,amazon.dev,GTO-PROXY
