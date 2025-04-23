@@ -68,3 +68,6 @@ HOST-SUFFIX,featureassets.org,GTO-PROXY
 # amazon
 HOST-SUFFIX,arkoselabs.com,GTO-PROXY
 HOST-SUFFIX,amazon.dev,GTO-PROXY
+
+# home-assistant
+HOST-SUFFIX,cartocdn.com,GTO-PROXY
