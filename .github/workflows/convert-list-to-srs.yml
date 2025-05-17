@@ -1,4 +1,4 @@
-name: convert-list-to-sys
+name: convert-list-to-srs
 
 on:
   workflow_dispatch:
