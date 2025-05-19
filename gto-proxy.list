@@ -77,3 +77,7 @@ HOST-SUFFIX,amazon-dss.com,GTO-PROXY
 
 # home-assistant
 HOST-SUFFIX,cartocdn.com,GTO-PROXY
+
+# etsy
+HOST-SUFFIX,etsy.com,GTO-PROXY
+HOST-SUFFIX,etsystatic.com,GTO-PROXY
