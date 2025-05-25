@@ -81,3 +81,9 @@ HOST-SUFFIX,cartocdn.com,GTO-PROXY
 # etsy
 HOST-SUFFIX,etsy.com,GTO-PROXY
 HOST-SUFFIX,etsystatic.com,GTO-PROXY
+
+# temu
+# etsy
+HOST-SUFFIX,temu.com,GTO-PROXY
+HOST-SUFFIX,temucdn.com,GTO-PROXY
+HOST-SUFFIX,temuapps.com,GTO-PROXY
