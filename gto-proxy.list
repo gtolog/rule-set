@@ -30,6 +30,7 @@ HOST-SUFFIX,kernel.org,GTO-PROXY
 HOST-SUFFIX,arin.net,GTO-PROXY
 HOST-SUFFIX,opensubtitles.com,GTO-PROXY
 HOST-SUFFIX,omdbapi.com,GTO-PROXY
+HOST-SUFFIX,routinehub.io,GTO-PROXY
 
 # tubi
 HOST-SUFFIX,tubi.tv,GTO-PROXY
