@@ -34,6 +34,7 @@ HOST-SUFFIX,omdbapi.com,GTO-PROXY
 HOST-SUFFIX,routinehub.io,GTO-PROXY
 HOST-SUFFIX,routinehub.co,GTO-PROXY
 HOST-SUFFIX,appraven.net,GTO-PROXY
+HOST-SUFFIX,picsum.photos,GTO-PROXY
 
 # tubi
 HOST-SUFFIX,tubi.tv,GTO-PROXY
