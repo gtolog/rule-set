@@ -92,3 +92,6 @@ HOST-SUFFIX,temu.com,GTO-PROXY
 HOST-SUFFIX,temucdn.com,GTO-PROXY
 HOST-SUFFIX,temuapps.com,GTO-PROXY
 HOST-SUFFIX,kwcdn.com,GTO-PROXY
+
+#F-Droid
+HOST-SUFFIX,f-droid.org,GTO-PROXY
