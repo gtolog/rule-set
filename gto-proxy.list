@@ -35,6 +35,7 @@ HOST-SUFFIX,routinehub.io,GTO-PROXY
 HOST-SUFFIX,routinehub.co,GTO-PROXY
 HOST-SUFFIX,appraven.net,GTO-PROXY
 HOST-SUFFIX,picsum.photos,GTO-PROXY
+HOST-SUFFIX,ko-fi.com,GTO-PROXY
 
 # tubi
 HOST-SUFFIX,tubi.tv,GTO-PROXY
@@ -97,9 +98,12 @@ HOST-SUFFIX,kwcdn.com,GTO-PROXY
 HOST-SUFFIX,f-droid.org,GTO-PROXY
 
 # Stremio
+HOST-SUFFIX,stremio.com,GTO-PROXY
 HOST-SUFFIX,strem.io,GTO-PROXY
 HOST-SUFFIX,strem.fun,GTO-PROXY
+HOST-SUFFIX,strem.bar,GTO-PROXY
 HOST-SUFFIX,elfhosted.com,GTO-PROXY
+HOST-SUFFIX,baby-beamup.club,GTO-PROXY
 HOST-SUFFIX,justwatch.com,GTO-PROXY
 HOST-SUFFIX,themoviedb.org,GTO-PROXY
 HOST-SUFFIX,tmdb.org,GTO-PROXY
