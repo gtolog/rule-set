@@ -93,5 +93,13 @@ HOST-SUFFIX,temucdn.com,GTO-PROXY
 HOST-SUFFIX,temuapps.com,GTO-PROXY
 HOST-SUFFIX,kwcdn.com,GTO-PROXY
 
-#F-Droid
+# F-Droid
 HOST-SUFFIX,f-droid.org,GTO-PROXY
+
+# Stremio
+HOST-SUFFIX,strem.io,GTO-PROXY
+HOST-SUFFIX,strem.fun,GTO-PROXY
+HOST-SUFFIX,elfhosted.com,GTO-PROXY
+HOST-SUFFIX,justwatch.com,GTO-PROXY
+HOST-SUFFIX,themoviedb.org,GTO-PROXY
+HOST-SUFFIX,tmdb.org,GTO-PROXY
