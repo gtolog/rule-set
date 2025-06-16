@@ -106,7 +106,10 @@ HOST-SUFFIX,elfhosted.com,GTO-PROXY
 HOST-SUFFIX,baby-beamup.club,GTO-PROXY
 HOST-SUFFIX,justwatch.com,GTO-PROXY
 HOST-SUFFIX,themoviedb.org,GTO-PROXY
+# Stremio The Movie Database Addon
 HOST-SUFFIX,tmdb.org,GTO-PROXY
+HOST-SUFFIX,metahub.space,GTO-PROXY
+HOST-SUFFIX,fanart.tv,GTO-PROXY
 
 # Huggingface
 HOST-SUFFIX,huggingface.co,GTO-PROXY
