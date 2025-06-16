@@ -107,3 +107,7 @@ HOST-SUFFIX,baby-beamup.club,GTO-PROXY
 HOST-SUFFIX,justwatch.com,GTO-PROXY
 HOST-SUFFIX,themoviedb.org,GTO-PROXY
 HOST-SUFFIX,tmdb.org,GTO-PROXY
+
+# Huggingface
+HOST-SUFFIX,huggingface.co,GTO-PROXY
+HOST-SUFFIX,hf.co,GTO-PROXY
