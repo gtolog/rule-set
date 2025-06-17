@@ -114,7 +114,3 @@ HOST-SUFFIX,fanart.tv,GTO-PROXY
 # Huggingface
 HOST-SUFFIX,huggingface.co,GTO-PROXY
 HOST-SUFFIX,hf.co,GTO-PROXY
-
-
-# Append new domain via Shortcut
-HOST-SUFFIX,example.co.uk,GTO-PROXY
