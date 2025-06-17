@@ -1,1 +1,0 @@
-$configuration.update();
