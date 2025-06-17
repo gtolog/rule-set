@@ -119,3 +119,6 @@ HOST-SUFFIX,hf.co,GTO-PROXY
 HOST-SUFFIX,apibay.org,GTO-PROXY
 # Append new domain via Shortcut
 HOST-SUFFIX,repcz.link,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,example.org,GTO-PROXY
