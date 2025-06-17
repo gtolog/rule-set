@@ -9,7 +9,7 @@ on:
       - 'DoH-elf.list'
       - 'DoH-public.list'
   schedule:
-    - cron: "0 9 * * *"  # Every day at 9 AM UTC
+    - cron: "0 18 1 * *"  # On day 1 of the month 18:00 UTC
 
 concurrency:
   group: commit-to-main
