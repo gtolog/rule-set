@@ -71,3 +71,10 @@ jobs:
           git pull --rebase
           git push origin main
         fi
+        
+    - name: Trigger private repo workflow
+      run: |
+        curl -X POST https://api.github.com/repos/gtolog/action-trigger/dispatches \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.TRIGGER_PAT }}" \
+          -d '{"event_type":"trigger-from-rule-set"}'
