@@ -124,3 +124,5 @@ HOST-SUFFIX,repcz.link,GTO-PROXY
 HOST-SUFFIX,example.org,GTO-PROXY
 # Append new domain via Shortcut
 HOST-SUFFIX,test.org,GTO-PROXY
+# Append new domain via Shortcut
+HOST-SUFFIX,test.url,GTO-PROXY
