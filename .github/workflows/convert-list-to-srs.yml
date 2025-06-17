@@ -7,6 +7,10 @@ on:
     types:
       - completed
 
+concurrency:
+  group: commit-to-main
+  cancel-in-progress: false
+
 env:
   OUTPUT_DIR: "${{ github.workspace }}/sing-box"
 
@@ -35,6 +39,8 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # 获取完整历史，才能正常 rebase
 
     - name: Find all *.list files
       id: find_list_files
@@ -61,5 +67,7 @@ jobs:
           exit 0
         else
           git commit -m "Update rules"
-          git push
+          # 🔁 拉取最新远程状态并 rebase
+          git pull --rebase
+          git push origin main
         fi
