@@ -7,7 +7,6 @@ HOST,httpdns.baidubce.com
 HOST,dnspod.meituan.httpdns.qcloud.com
 HOST,httpdnsmultiapi.meituan.com
 HOST,httpdnsmultiapivip.meituan.com
-HOST,hcdnl.pull302.gslb.livehwc3.cn
 HOST,httpdns.meituan.com
 HOST,httpdns.baidu.com
 HOST,httpsdns.baidu.com
