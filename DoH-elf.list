@@ -11,6 +11,8 @@ HOST,dnspod.meituan.httpdns.qcloud.com,DoH-elf
 HOST,httpdnsmultiapi.meituan.com,DoH-elf
 HOST,httpdnsmultiapivip.meituan.com,DoH-elf
 HOST,httpdns.meituan.com,DoH-elf
+IP-CIDR,202.90.110.46/32,DoH-elf
+IP-CIDR,202.90.108.13/32,DoH-elf
 
 # zhihu
 IP-CIDR,103.41.167.237/32,DoH-elf
