@@ -159,8 +159,8 @@ jobs:
           cat resolved_ips_v6.txt >> $IPCIDRLIST_V6
 
           # Append original IP-CIDR list to output
-          cat $IPCIDRLIST_V4 >> $OUTPUT_V4
-          cat $IPCIDRLIST_V6 >> $OUTPUT_V6
+          cat $IPCIDRLIST_V4 > $OUTPUT_V4
+          cat $IPCIDRLIST_V6 > $OUTPUT_V6
 
           # Remove duplicates and sort the final list of IPs and CIDRs
           sort -u $OUTPUT_V4 -o $OUTPUT_V4  # Sort and remove duplicates in place for IPv4
