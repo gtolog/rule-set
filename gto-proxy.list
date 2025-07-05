@@ -124,3 +124,5 @@ HOST-SUFFIX,repcz.link,GTO-PROXY
 HOST-SUFFIX,529059.xyz,GTO-PROXY
 # Append new domain via Shortcut
 HOST-SUFFIX,gitbook.io,GTO-PROXY
+# Append new domain via Shortcut
+HOST-SUFFIX,boxjs.app,GTO-PROXY
