@@ -46,6 +46,11 @@ HOST-SUFFIX,tubi.video,GTO-PROXY
 HOST-SUFFIX,adrise.tv,GTO-PROXY
 HOST-SUFFIX,licensekeyserver.com,GTO-PROXY
 
+# m-team
+HOST-SUFFIX,m-team.cc,GTO-PROXY
+HOST-SUFFIX,m-team.io,GTO-PROXY
+HOST-SUFFIX,m-team.co,GTO-PROXY
+
 # torrent
 HOST-SUFFIX,rutracker.org,GTO-PROXY
 HOST-SUFFIX,rutracker.ru,GTO-PROXY
