@@ -117,6 +117,9 @@ HOST-SUFFIX,tmdb.org,GTO-PROXY
 HOST-SUFFIX,metahub.space,GTO-PROXY
 HOST-SUFFIX,fanart.tv,GTO-PROXY
 
+# dockerhub1.beget.com
+HOST-SUFFIX,beget.com,GTO-PROXY
+
 # Huggingface
 HOST-SUFFIX,huggingface.co,GTO-PROXY
 HOST-SUFFIX,hf.co,GTO-PROXY
