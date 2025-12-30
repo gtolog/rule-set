@@ -1,5 +1,5 @@
 HOST-SUFFIX,test-ipv6.com
 HOST-SUFFIX,canyouseeme.org
 HOST-SUFFIX,ipwhois.io
-HOST-SUFFIX,ccc-x.jd.com
-HOST-SUFFIX,im-x.jd.com
+HOST,ccc-x.jd.com
+HOST,im-x.jd.com
