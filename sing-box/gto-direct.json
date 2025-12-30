@@ -1,10 +1,14 @@
 {
   "rules": [
     {
+      "domain": [
+        "ccc-x.jd.com",
+        "im-x.jd.com"
+      ]
+    },
+    {
       "domain_suffix": [
         "canyouseeme.org",
-        "ccc-x.jd.com",
-        "im-x.jd.com",
         "ipwhois.io",
         "test-ipv6.com"
       ]
