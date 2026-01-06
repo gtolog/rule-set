@@ -137,4 +137,6 @@ HOST-SUFFIX,gitbook.io,GTO-PROXY
 HOST-SUFFIX,boxjs.app,GTO-PROXY
 
 # Append new domain via Shortcut
+HOST-SUFFIX,slideshare.com,GTO-PROXY
 HOST-SUFFIX,slideshare.net,GTO-PROXY
+HOST-SUFFIX,slidesharecdn.com,GTO-PROXY
