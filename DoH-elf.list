@@ -1,8 +1,8 @@
 # wechat
-HOST,dns.weixin.qq.com,DoH-elf
-HOST,dns.weixin.qq.com.cn,DoH-elf
-HOST,paydns.weixin.qq.com,DoH-elf
-HOST,aedns.weixin.qq.com,DoH-elf
+# HOST,dns.weixin.qq.com,DoH-elf
+# HOST,dns.weixin.qq.com.cn,DoH-elf
+# HOST,paydns.weixin.qq.com,DoH-elf
+# HOST,aedns.weixin.qq.com,DoH-elf
 
 # meituan
 HOST,resolvers-cn.httpdns.aliyuncs.com,DoH-elf
