@@ -2,11 +2,8 @@
   "rules": [
     {
       "domain": [
-        "aedns.weixin.qq.com",
         "dns.iqiyi.com",
         "dns.qiyipic.iqiyi.com",
-        "dns.weixin.qq.com",
-        "dns.weixin.qq.com.cn",
         "dnspod.meituan.httpdns.qcloud.com",
         "doh.iqiyi.com",
         "httpdns.baidu.com",
@@ -14,7 +11,6 @@
         "httpdns.bcelive.com",
         "httpdns.n.shifen.com",
         "httpsdns.baidu.com",
-        "paydns.weixin.qq.com",
         "resolvers-cn.httpdns.aliyuncs.com"
       ]
     },
