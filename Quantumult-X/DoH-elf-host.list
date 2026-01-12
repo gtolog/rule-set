@@ -1,7 +1,3 @@
-HOST,dns.weixin.qq.com
-HOST,dns.weixin.qq.com.cn
-HOST,paydns.weixin.qq.com
-HOST,aedns.weixin.qq.com
 HOST,resolvers-cn.httpdns.aliyuncs.com
 HOST,httpdns.baidubce.com
 HOST,dnspod.meituan.httpdns.qcloud.com
