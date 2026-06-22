@@ -2,6 +2,9 @@ name: convert-list-to-srs
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'gto-home.list'
   workflow_run:
     workflows: ["resolve-DoH-elf-hosts-and-save-ipcidr"]  # Name of the first workflow
     types:
