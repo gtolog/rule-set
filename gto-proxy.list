@@ -118,6 +118,7 @@ HOST-SUFFIX,metahub.space,GTO-PROXY
 HOST-SUFFIX,fanart.tv,GTO-PROXY
 
 HOST-SUFFIX,addic7ed.com,GTO-PROXY
+HOST-SUFFIX,allawnos.com,GTO-PROXY
 
 # dockerhub1.beget.com
 HOST-SUFFIX,beget.com,GTO-PROXY
