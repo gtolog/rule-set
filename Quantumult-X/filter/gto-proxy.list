@@ -1,0 +1,153 @@
+# NAME: GTO-PROXY
+# AUTHOR: 
+# REPO: https://github.com/gtolog/rule-set
+# UPDATED: 2025-04-07 10:18:00
+# HOST: 0
+# HOST-KEYWORD: 0
+# HOST-SUFFIX: 33
+# IP-CIDR: 6
+# IP6-CIDR: 0
+# USER-AGENT: 0
+# TOTAL: 39
+# COMMENTS: manually maintained
+# CREATED: 2025-03-18 13:48:00
+
+# common
+HOST-SUFFIX,sagernet.org,GTO-PROXY
+HOST-SUFFIX,greasyfork.org,GTO-PROXY
+HOST-SUFFIX,leiting.io,GTO-PROXY
+HOST-SUFFIX,leiting.uniss.me,GTO-PROXY
+HOST-SUFFIX,nn8qozmu.top,GTO-PROXY
+HOST-SUFFIX,bandwagonhost.com,GTO-PROXY
+HOST-SUFFIX,openwrt.org,GTO-PROXY
+HOST-SUFFIX,apkmirror.com,GTO-PROXY
+HOST-SUFFIX,uscardforum.com,GTO-PROXY
+HOST-SUFFIX,jellyfin.org,GTO-PROXY
+HOST-SUFFIX,strem.io,GTO-PROXY
+HOST-SUFFIX,strem.fun,GTO-PROXY
+HOST-SUFFIX,thexem.info,GTO-PROXY
+HOST-SUFFIX,imgflip.com,GTO-PROXY
+HOST-SUFFIX,brew.sh,GTO-PROXY
+HOST-SUFFIX,kernel.org,GTO-PROXY
+HOST-SUFFIX,arin.net,GTO-PROXY
+HOST-SUFFIX,opensubtitles.com,GTO-PROXY
+HOST-SUFFIX,omdbapi.com,GTO-PROXY
+HOST-SUFFIX,routinehub.io,GTO-PROXY
+HOST-SUFFIX,routinehub.co,GTO-PROXY
+HOST-SUFFIX,appraven.net,GTO-PROXY
+HOST-SUFFIX,picsum.photos,GTO-PROXY
+HOST-SUFFIX,ko-fi.com,GTO-PROXY
+
+# tubi
+HOST-SUFFIX,tubi.tv,GTO-PROXY
+HOST-SUFFIX,tubitv.com,GTO-PROXY
+HOST-SUFFIX,tubi.io,GTO-PROXY
+HOST-SUFFIX,tubi.video,GTO-PROXY
+HOST-SUFFIX,adrise.tv,GTO-PROXY
+HOST-SUFFIX,licensekeyserver.com,GTO-PROXY
+
+# m-team
+HOST-SUFFIX,m-team.cc,GTO-PROXY
+HOST-SUFFIX,m-team.io,GTO-PROXY
+HOST-SUFFIX,m-team.co,GTO-PROXY
+
+# torrent
+HOST-SUFFIX,rutracker.org,GTO-PROXY
+HOST-SUFFIX,rutracker.ru,GTO-PROXY
+HOST-SUFFIX,yts.mx,GTO-PROXY
+HOST-SUFFIX,bt4gprx.com,GTO-PROXY
+HOST-SUFFIX,bt4g.com,GTO-PROXY
+
+# live
+HOST-SUFFIX,moveonjoy.com,GTO-PROXY
+HOST-SUFFIX,thetvapp.to,GTO-PROXY
+HOST-SUFFIX,warnermediacdn.com,GTO-PROXY
+HOST-SUFFIX,akamaized.net,GTO-PROXY
+HOST-SUFFIX,gvt1.com,GTO-PROXY
+HOST-SUFFIX,vustreams.com,GTO-PROXY
+HOST-SUFFIX,amagi.tv,GTO-PROXY
+HOST-SUFFIX,cdn1host.online,GTO-PROXY
+IP-CIDR,41.205.93.154/32,GTO-PROXY
+IP-CIDR,143.244.60.30/32,GTO-PROXY
+IP-CIDR,212.102.60.231/32,GTO-PROXY
+IP-CIDR,84.17.40.25/32,GTO-PROXY
+IP-CIDR,72.46.118.193/32,GTO-PROXY
+IP-CIDR,190.92.10.66/32,GTO-PROXY
+IP-CIDR,107.151.8.2/32,GTO-PROXY
+HOST-SUFFIX,aktv.top,GTO-PROXY
+HOST-SUFFIX,m16tv.cfd,GTO-PROXY
+HOST-SUFFIX,tvpass.org,GTO-PROXY
+
+IP-CIDR,94.177.193.237/32,GTO-PROXY
+
+# openai and grok
+HOST-SUFFIX,featureassets.org,GTO-PROXY
+
+# amazon
+HOST-SUFFIX,arkoselabs.com,GTO-PROXY
+HOST-SUFFIX,amazon.dev,GTO-PROXY
+HOST-SUFFIX,amazonalexa.com,GTO-PROXY
+HOST-SUFFIX,amazon-dss.com,GTO-PROXY
+
+# home-assistant
+HOST-SUFFIX,cartocdn.com,GTO-PROXY
+
+# etsy
+HOST-SUFFIX,etsy.com,GTO-PROXY
+HOST-SUFFIX,etsystatic.com,GTO-PROXY
+
+# temu
+HOST-SUFFIX,temu.com,GTO-PROXY
+HOST-SUFFIX,temucdn.com,GTO-PROXY
+HOST-SUFFIX,temuapps.com,GTO-PROXY
+HOST-SUFFIX,kwcdn.com,GTO-PROXY
+
+# F-Droid
+HOST-SUFFIX,f-droid.org,GTO-PROXY
+
+# Stremio
+HOST-SUFFIX,stremio.com,GTO-PROXY
+HOST-SUFFIX,strem.io,GTO-PROXY
+HOST-SUFFIX,strem.fun,GTO-PROXY
+HOST-SUFFIX,strem.bar,GTO-PROXY
+HOST-SUFFIX,elfhosted.com,GTO-PROXY
+HOST-SUFFIX,baby-beamup.club,GTO-PROXY
+HOST-SUFFIX,justwatch.com,GTO-PROXY
+HOST-SUFFIX,themoviedb.org,GTO-PROXY
+# Stremio The Movie Database Addon
+HOST-SUFFIX,tmdb.org,GTO-PROXY
+HOST-SUFFIX,metahub.space,GTO-PROXY
+HOST-SUFFIX,fanart.tv,GTO-PROXY
+
+HOST-SUFFIX,addic7ed.com,GTO-PROXY
+HOST-SUFFIX,allawnos.com,GTO-PROXY
+HOST-SUFFIX,in.appcenter.ms,GTO-PROXY
+
+# dockerhub1.beget.com
+HOST-SUFFIX,beget.com,GTO-PROXY
+
+# Huggingface
+HOST-SUFFIX,huggingface.co,GTO-PROXY
+HOST-SUFFIX,hf.co,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,apibay.org,GTO-PROXY
+# Append new domain via Shortcut
+HOST-SUFFIX,repcz.link,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,529059.xyz,GTO-PROXY
+# Append new domain via Shortcut
+HOST-SUFFIX,gitbook.io,GTO-PROXY
+# Append new domain via Shortcut
+HOST-SUFFIX,boxjs.app,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,slideshare.com,GTO-PROXY
+HOST-SUFFIX,slideshare.net,GTO-PROXY
+HOST-SUFFIX,slidesharecdn.com,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,izzysoft.de,GTO-PROXY
+# Append new domain via Shortcut
+HOST-SUFFIX,garyshare.sharewithyou.dpdns.org,GTO-PROXY
