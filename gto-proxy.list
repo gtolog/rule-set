@@ -77,6 +77,7 @@ IP-CIDR,107.151.8.2/32,GTO-PROXY
 HOST-SUFFIX,aktv.top,GTO-PROXY
 HOST-SUFFIX,m16tv.cfd,GTO-PROXY
 HOST-SUFFIX,tvpass.org,GTO-PROXY
+
 IP-CIDR,94.177.193.237/32,GTO-PROXY
 
 # openai and grok
@@ -120,6 +121,7 @@ HOST-SUFFIX,fanart.tv,GTO-PROXY
 
 HOST-SUFFIX,addic7ed.com,GTO-PROXY
 HOST-SUFFIX,allawnos.com,GTO-PROXY
+HOST-SUFFIX,in.appcenter.ms,GTO-PROXY
 
 # dockerhub1.beget.com
 HOST-SUFFIX,beget.com,GTO-PROXY
