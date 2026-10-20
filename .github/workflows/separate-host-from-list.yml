@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'gto-proxy.list'
-      - 'gto-direct.list'
-      - 'DoH-elf.list'
-      - 'DoH-public.list'
+      - '/Quantumult-X/filter/gto-proxy.list'
+      - '/Quantumult-X/filter/gto-direct.list'
+      - '/Quantumult-X/filter/DoH-elf.list'
+      - '/Quantumult-X/filter/DoH-public.list'
   schedule:
     - cron: "0 18 1 * *"  # On day 1 of the month 18:00 UTC
 
@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      INPUTS: "gto-proxy.list gto-direct.list DoH-elf.list DoH-public.list"
-      OUTPUT_DIR: "${{ github.workspace }}/Quantumult-X"
+      INPUTS: "/Quantumult-X/filter/gto-proxy.list /Quantumult-X/filter/gto-direct.list /Quantumult-X/filter/DoH-elf.list /Quantumult-X/filter/DoH-public.list"
+      OUTPUT_DIR: "${{ github.workspace }}/Quantumult-X/filter"
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
