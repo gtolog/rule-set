@@ -17,7 +17,7 @@ jobs:
 
     env:
       RESOLVERS: "223.5.5.5 119.29.29.29"  # List of resolvers as space-separated values
-      INPUT: "/Quantumult-X/filter/DoH-elf.list"
+      INPUT: "Quantumult-X/filter/DoH-elf.list"
       HOSTLIST: "host-list.txt"
       IPCIDRLIST_V4: "ipcidr-list-v4.txt"
       IPCIDRLIST_V6: "ipcidr-list-v6.txt"
