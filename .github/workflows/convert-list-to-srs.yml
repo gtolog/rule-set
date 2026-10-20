@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'gto-home.list'
+      - '/Quantumult-X/filter/gto-home.list'
   workflow_run:
     workflows: ["resolve-DoH-elf-hosts-and-save-ipcidr"]  # Name of the first workflow
     types:
@@ -56,7 +56,7 @@ jobs:
     - name: convert list
       run: |
         mkdir -p "$OUTPUT_DIR"
-        python converter.py
+        python /tools/converter-to-srs.py
 
     - name: commit and push
       run: |
