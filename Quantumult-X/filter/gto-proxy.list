@@ -106,8 +106,8 @@ HOST-SUFFIX,kwcdn.com,GTO-PROXY
 HOST-SUFFIX,f-droid.org,GTO-PROXY
 
 # pbs
-HOST-SUFFIX,pbs.org,PBS
-HOST-SUFFIX,pbskids.org,PBS
+HOST-SUFFIX,pbs.org,GTO-PROXY
+HOST-SUFFIX,pbskids.org,GTO-PROXY
 
 # Stremio
 HOST-SUFFIX,stremio.com,GTO-PROXY
