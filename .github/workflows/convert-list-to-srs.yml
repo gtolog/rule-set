@@ -18,7 +18,7 @@ env:
   OUTPUT_DIR: "${{ github.workspace }}/sing-box"
 
 jobs:
-  convert-list-to-sys:
+  convert-list-to-srs:
     runs-on: ubuntu-latest
 
     steps:
