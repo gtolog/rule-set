@@ -1,0 +1,118 @@
+name: Update IP Lists
+
+on:
+  # 定时触发：每天北京时间早上 8 点运行 (UTC 0:00)
+  schedule:
+    - cron: '0 0 * * *'
+  # 允许在 GitHub Actions 页面手动触发
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-ip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create target directory
+        run: mkdir -p ipcidr
+
+      - name: Download cidr-merger tool
+        run: |
+          CIDR_MERGER_URL=$(curl -s https://api.github.com/repos/zhanhb/cidr-merger/releases/latest | grep -Po '(?<=download_url\").*linux-amd64' | sed "s/^...//")
+          wget -O cidr-merger "$CIDR_MERGER_URL"
+          chmod +x cidr-merger
+
+      - name: Fetch and process China IP lists
+        run: |
+          # 1. 下载原始数据源
+          curl -s -o bgp-ipv4.list "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china.txt"
+          curl -s -o bgp-ipv6.list "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china6.txt"
+          curl -s "https://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest" > apnic.txt
+          
+          # 2. 解析 APNIC 数据
+          cat apnic.txt | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > apnic-ipv4.list
+          cat apnic.txt | grep "|CN|ipv6|" | cut -d"|" -f"4,5" | tr "|" "/" > apnic-ipv6.list
+          rm apnic.txt
+
+          # 3. 清理格式并合并输出中国主列表
+          sed -i "s/[[:space:]]//g" *.list 
+          cat *ipv4.list | ./cidr-merger -s > ipcidr/china-ipv4.txt
+          cat *ipv6.list | ./cidr-merger -s > ipcidr/china-ipv6.txt
+          rm *.list
+
+      - name: Fetch and process Telegram IP lists
+        run: |
+          curl -s https://core.telegram.org/resources/cidr.txt > telegram_raw.txt
+          # 使用 Python 分离 IPv4 和 IPv6
+          python3 -c '
+          with open("telegram_raw.txt") as f:
+              lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+          v4 = [l for l in lines if "." in l]
+          v6 = [l for l in lines if ":" in l]
+          with open("telegram-v4.list", "w") as f:
+              f.write("\n".join(v4) + "\n")
+          with open("telegram-v6.list", "w") as f:
+              f.write("\n".join(v6) + "\n")
+          '
+          ./cidr-merger -s < telegram-v4.list > ipcidr/telegram-ipv4.txt
+          ./cidr-merger -s < telegram-v6.list > ipcidr/telegram-ipv6.txt
+          rm telegram_raw.txt telegram-v4.list telegram-v6.list
+
+      - name: Fetch and process AWS IP lists
+        run: |
+          curl -s https://ip-ranges.amazonaws.com/ip-ranges.json > ip-ranges.json
+          # 使用 Python 解析 AWS JSON 并根据 region 是否以 cn- 开头分类
+          python3 -c '
+          import json
+          with open("ip-ranges.json") as f:
+              data = json.load(f)
+
+          amzn_china_v4, amzn_non_china_v4 = [], []
+          amzn_china_v6, amzn_non_china_v6 = [], []
+
+          for prefix in data.get("prefixes", []):
+              ip = prefix.get("ip_prefix")
+              region = prefix.get("region", "")
+              if region.startswith("cn"):
+                  amzn_china_v4.append(ip)
+              else:
+                  amzn_non_china_v4.append(ip)
+
+          for prefix in data.get("ipv6_prefixes", []):
+              ip = prefix.get("ipv6_prefix")
+              region = prefix.get("region", "")
+              if region.startswith("cn"):
+                  amzn_china_v6.append(ip)
+              else:
+                  amzn_non_china_v6.append(ip)
+
+          with open("amzn-china-v4.list", "w") as f: f.write("\n".join(amzn_china_v4) + "\n")
+          with open("amzn-non-china-v4.list", "w") as f: f.write("\n".join(amzn_non_china_v4) + "\n")
+          with open("amzn-china-v6.list", "w") as f: f.write("\n".join(amzn_china_v6) + "\n")
+          with open("amzn-non-china-v6.list", "w") as f: f.write("\n".join(amzn_non_china_v6) + "\n")
+          '
+          ./cidr-merger -s < amzn-china-v4.list > ipcidr/amazon-china-ipv4.txt
+          ./cidr-merger -s < amzn-non-china-v4.list > ipcidr/amazon-!china-ipv4.txt
+          ./cidr-merger -s < amzn-china-v6.list > ipcidr/amazon-china-ipv6.txt
+          ./cidr-merger -s < amzn-non-china-v6.list > ipcidr/amazon-!china-ipv6.txt
+
+          rm ip-ranges.json amzn-china-v4.list amzn-non-china-v4.list amzn-china-v6.list amzn-non-china-v6.list cidr-merger
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add ipcidr/
+          
+          if git diff --quiet --staged; then
+            echo "No changes detected, skipping commit."
+            exit 0
+          fi
+          
+          git commit -m "Update IP CIDR lists (China, Telegram, AWS): $(date --rfc-3339=sec)"
+          git push
