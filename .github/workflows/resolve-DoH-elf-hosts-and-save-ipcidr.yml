@@ -21,8 +21,8 @@ jobs:
       HOSTLIST: "host-list.txt"
       IPCIDRLIST_V4: "ipcidr-list-v4.txt"
       IPCIDRLIST_V6: "ipcidr-list-v6.txt"
-      OUTPUT_V4: "${{ github.workspace }}/ipcidr/DoH-elf-ipcidr-v4.txt"
-      OUTPUT_V6: "${{ github.workspace }}/ipcidr/DoH-elf-ipcidr-v6.txt"
+      OUTPUT_V4: "${{ github.workspace }}/ipcidr/DoH-elf-ipv4.txt"
+      OUTPUT_V6: "${{ github.workspace }}/ipcidr/DoH-elf-ipv6.txt"
       
     steps:
       - uses: actions/checkout@v3  # Checkout the repo
