@@ -40,8 +40,8 @@ jobs:
 
           # 3. 清理格式并合并输出中国主列表
           sed -i "s/[[:space:]]//g" *.list 
-          cat *ipv4.list | ./cidr-merger -s > ipcidr/china-ipv4.txt
-          cat *ipv6.list | ./cidr-merger -s > ipcidr/china-ipv6.txt
+          cat *ipv4.list | ./cidr-merger -s > ipcidr/china-ipv4.cidr
+          cat *ipv6.list | ./cidr-merger -s > ipcidr/china-ipv6.cidr
           rm *.list
 
       - name: Fetch and process Telegram IP lists
@@ -58,8 +58,8 @@ jobs:
           with open("telegram-v6.list", "w") as f:
               f.write("\n".join(v6) + "\n")
           '
-          ./cidr-merger -s < telegram-v4.list > ipcidr/telegram-ipv4.txt
-          ./cidr-merger -s < telegram-v6.list > ipcidr/telegram-ipv6.txt
+          ./cidr-merger -s < telegram-v4.list > ipcidr/telegram-ipv4.cidr
+          ./cidr-merger -s < telegram-v6.list > ipcidr/telegram-ipv6.cidr
           rm telegram_raw.txt telegram-v4.list telegram-v6.list
 
       - name: Fetch and process AWS IP lists
@@ -95,10 +95,10 @@ jobs:
           with open("amzn-china-v6.list", "w") as f: f.write("\n".join(amzn_china_v6) + "\n")
           with open("amzn-non-china-v6.list", "w") as f: f.write("\n".join(amzn_non_china_v6) + "\n")
           '
-          ./cidr-merger -s < amzn-china-v4.list > ipcidr/amazon-china-ipv4.txt
-          ./cidr-merger -s < amzn-non-china-v4.list > ipcidr/amazon-!china-ipv4.txt
-          ./cidr-merger -s < amzn-china-v6.list > ipcidr/amazon-china-ipv6.txt
-          ./cidr-merger -s < amzn-non-china-v6.list > ipcidr/amazon-!china-ipv6.txt
+          ./cidr-merger -s < amzn-china-v4.list > ipcidr/amazon-china-ipv4.cidr
+          ./cidr-merger -s < amzn-non-china-v4.list > ipcidr/amazon-!china-ipv4.cidr
+          ./cidr-merger -s < amzn-china-v6.list > ipcidr/amazon-china-ipv6.cidr
+          ./cidr-merger -s < amzn-non-china-v6.list > ipcidr/amazon-!china-ipv6.cidr
 
           rm ip-ranges.json amzn-china-v4.list amzn-non-china-v4.list amzn-china-v6.list amzn-non-china-v6.list cidr-merger
 
