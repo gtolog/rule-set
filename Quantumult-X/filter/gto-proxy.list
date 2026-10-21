@@ -155,3 +155,6 @@ HOST-SUFFIX,slidesharecdn.com,GTO-PROXY
 HOST-SUFFIX,izzysoft.de,GTO-PROXY
 # Append new domain via Shortcut
 HOST-SUFFIX,garyshare.sharewithyou.dpdns.org,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,huecker.io,GTO-PROXY
