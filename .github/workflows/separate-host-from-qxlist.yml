@@ -1,4 +1,4 @@
-name: separate-host-from-list
+name: separate-host-from-qxlist
 
 on:
   workflow_dispatch:
