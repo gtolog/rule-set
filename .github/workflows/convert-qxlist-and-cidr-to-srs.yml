@@ -1,4 +1,4 @@
-name: convert-qxlist-to-srs
+name: convert-qxlist-and-cidr-to-srs
 
 on:
   workflow_dispatch:
@@ -6,7 +6,9 @@ on:
     paths:
       - 'Quantumult-X/filter/gto-home.list'
   workflow_run:
-    workflows: ["resolve-DoH-elf-hosts-and-save-ipcidr"]  # Name of the first workflow
+    workflows: 
+      - "resolve-DoH-elf-hosts-and-save-ipcidr"  # Name of the first workflow
+      - "update-ipcidr"
     types:
       - completed
 
@@ -45,12 +47,12 @@ jobs:
       with:
         fetch-depth: 0  # 获取完整历史，才能正常 rebase
 
-    - name: Find all *.list files
+    - name: Find all *.list and *.cidr files
       id: find_list_files
       run: |
-        # Find all *.list files recursively in the repository and store them in LIST_TO_BE_CONVERTED
-        LIST_TO_BE_CONVERTED=$(find $GITHUB_WORKSPACE -type f -name "*.list" | tr '\n' ' ')
-        echo "Found the following *.list files: $LIST_TO_BE_CONVERTED"
+        # Find all *.list and *.cidr files recursively in the repository and store them in LIST_TO_BE_CONVERTED
+        LIST_TO_BE_CONVERTED=$(find $GITHUB_WORKSPACE -type f \( -name "*.list" -o -name "*.cidr" \) | tr '\n' ' ')
+        echo "Found the following *.list and *.cidr files: $LIST_TO_BE_CONVERTED"
         echo "LIST_TO_BE_CONVERTED=$LIST_TO_BE_CONVERTED" >> $GITHUB_ENV
 
     - name: convert list
