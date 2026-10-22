@@ -83,6 +83,7 @@
         "thetvapp.to",
         "thexem.info",
         "tmdb.org",
+        "transmissionbt.com",
         "tubi.io",
         "tubi.tv",
         "tubi.video",
@@ -92,18 +93,6 @@
         "vustreams.com",
         "warnermediacdn.com",
         "yts.mx"
-      ]
-    },
-    {
-      "ip_cidr": [
-        "107.151.8.2/32",
-        "143.244.60.30/32",
-        "190.92.10.66/32",
-        "212.102.60.231/32",
-        "41.205.93.154/32",
-        "72.46.118.193/32",
-        "84.17.40.25/32",
-        "94.177.193.237/32"
       ]
     }
   ],
