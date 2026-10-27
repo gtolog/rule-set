@@ -151,3 +151,6 @@ HOST-SUFFIX,garyshare.sharewithyou.dpdns.org,GTO-PROXY
 
 # Append new domain via Shortcut
 HOST-SUFFIX,huecker.io,GTO-PROXY
+
+# Append new domain via Shortcut
+HOST-SUFFIX,nodeseek.com,GTO-PROXY
