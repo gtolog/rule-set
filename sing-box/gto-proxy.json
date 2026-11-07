@@ -1,6 +1,12 @@
 {
   "rules": [
     {
+      "domain": [
+        "global.sns.cs.quickconnect.to",
+        "global.synologydownload.com"
+      ]
+    },
+    {
       "domain_suffix": [
         "529059.xyz",
         "addic7ed.com",
