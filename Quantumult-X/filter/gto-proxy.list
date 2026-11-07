@@ -38,6 +38,10 @@ HOST-SUFFIX,appraven.net,GTO-PROXY
 HOST-SUFFIX,picsum.photos,GTO-PROXY
 HOST-SUFFIX,ko-fi.com,GTO-PROXY
 
+# synology
+HOST,global.synologydownload.com,GTO-PROXY
+HOST,global.sns.cs.quickconnect.to,GTO-PROXY
+
 # tubi
 HOST-SUFFIX,tubi.tv,GTO-PROXY
 HOST-SUFFIX,tubitv.com,GTO-PROXY
