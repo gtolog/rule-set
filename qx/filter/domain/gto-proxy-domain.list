@@ -162,6 +162,3 @@ HOST-SUFFIX,nodeseek.com
 HOST-SUFFIX,hysteria.network
 # Append new domain via Shortcut
 HOST-SUFFIX,ermao.net
-
-# Append new domain via Shortcut
-HOST-SUFFIX,example.com
