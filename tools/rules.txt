@@ -1,0 +1,2 @@
+https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/amazon.json
+https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/bandwagonhost.json
