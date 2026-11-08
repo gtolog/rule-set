@@ -2,8 +2,11 @@ name: update-rule-set
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *'
+  workflow_run:
+    workflows:
+      - "update-ipcidr"
+    types:
+      - completed
 
 permissions:
   contents: write
