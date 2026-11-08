@@ -37,6 +37,7 @@ HOST-SUFFIX,routinehub.co,GTO-PROXY
 HOST-SUFFIX,appraven.net,GTO-PROXY
 HOST-SUFFIX,picsum.photos,GTO-PROXY
 HOST-SUFFIX,ko-fi.com,GTO-PROXY
+HOST-SUFFIX,ipify.org,GTO-PROXY
 
 # synology
 HOST,global.synologydownload.com,GTO-PROXY
