@@ -55,13 +55,13 @@ def load_text_or_yaml(path_or_url):
 
 def is_ipv4_or_ipv6(address):
     try:
-        net = ipaddress.ip_network(address, strict=False)
+        ipaddress.ip_network(address, strict=False)
         return 'ip_cidr'
     except ValueError:
         return None
 
 def detect_file_type(content):
-    """检测输入内容是 sing-box JSON 规则文件还是普通的 List 列表"""
+    """自动检测内容是 sing-box JSON 规则文件还是普通的 List 列表"""
     try:
         data = json.loads(content)
         if isinstance(data, dict) and ('rules' in data or 'version' in data):
@@ -136,7 +136,6 @@ def parse_and_convert_content_to_dataframe(content):
 
     return pd.DataFrame(rows, columns=['pattern', 'address', 'other'])
 
-# 对字典进行排序，含 list of dict
 def sort_dict(obj):
     if isinstance(obj, dict):
         return {k: sort_dict(obj[k]) for k in sorted(obj)}
@@ -191,7 +190,7 @@ def convert_list_to_outputs(content, link, file_name_base, output_directory):
         return None
 
 def convert_json_to_outputs(data, file_name_base, output_directory):
-    """JSON 转 QX List & 编译 SRS"""
+    """JSON 转 QX List, 规范化 JSON & 编译 SRS"""
     try:
         rules = data.get('rules', [])
         list_lines = []
@@ -219,7 +218,7 @@ def convert_json_to_outputs(data, file_name_base, output_directory):
         with open(list_file_path, 'w', encoding='utf-8') as f:
             f.write('\n'.join(list_lines) + '\n')
         
-        # 同时确保规范化的 JSON 文件存在
+        # 写入规范化的 JSON 文件
         json_file_path = os.path.join(output_directory, f"{file_name_base}.json")
         with open(json_file_path, 'w', encoding='utf-8') as f:
             json.dump(sort_dict(data), f, ensure_ascii=False, indent=2)
@@ -238,7 +237,6 @@ def process_file(link, output_directory):
     if not content:
         return None
     
-    # 提取无后缀的文件名（去除 URL 查询参数）
     clean_basename = os.path.basename(link.split('?')[0])
     file_name_base = os.path.splitext(clean_basename)[0]
     if not file_name_base:
@@ -252,20 +250,34 @@ def process_file(link, output_directory):
     else:
         return convert_list_to_outputs(content, link, file_name_base, output_directory)
 
-# 获取环境变量或命令行参数
-links = os.getenv('LIST_TO_BE_CONVERTED', '').split()
+if __name__ == "__main__":
+    # 1. 优先读取环境变量
+    links = os.getenv('LIST_TO_BE_CONVERTED', '').split()
 
-if not links:
-    parser = argparse.ArgumentParser(description="Process list or json rule files.")
-    parser.add_argument('links', metavar='L', type=str, nargs='+', 
-                        help='List of file URLs or paths to process (space separated)')
-    args = parser.parse_args()
-    links = args.links
+    # 2. 其次读取命令行参数
+    if not links:
+        parser = argparse.ArgumentParser(description="Process list or json rule files.")
+        parser.add_argument('links', metavar='L', type=str, nargs='*', 
+                            help='List of file URLs or paths to process')
+        args = parser.parse_args()
+        links = args.links
 
-output_dir = os.getenv('OUTPUT_DIR', './output')
-result_file_names = []
+    # 3. 最后尝试读取 tools/rules.txt 文件（自动关联脚本所在目录）
+    if not links:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        rules_path = os.path.join(script_dir, 'rules.txt')
+        if os.path.exists(rules_path):
+            with open(rules_path, 'r', encoding='utf-8') as f:
+                links = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
 
-for link in links:
-    result_file_name = process_file(link, output_directory=output_dir)
-    if result_file_name:
-        result_file_names.append(result_file_name)
+    if not links:
+        print("Error: No links or files specified to convert!")
+        exit(1)
+
+    output_dir = os.getenv('OUTPUT_DIR', './output')
+    result_file_names = []
+
+    for link in links:
+        result_file_name = process_file(link, output_directory=output_dir)
+        if result_file_name:
+            result_file_names.append(result_file_name)
