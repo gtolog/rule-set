@@ -2,6 +2,10 @@ name: update-rule-set
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'qx/filter/domain/gto-proxy-domain.list'
+      - 'qx/filter/ip/gto-home-ip.list'
   workflow_run:
     workflows:
       - "update-ipcidr"
