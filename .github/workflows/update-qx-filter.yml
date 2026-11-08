@@ -1,4 +1,4 @@
-name: update-filter
+name: update-qx-filter
 
 on:
   workflow_dispatch:
@@ -13,10 +13,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FILTER_OUTPUT_DIR: "${{ github.workspace }}/Quantumult-X/filter"
+  OUTPUT_DIR: "${{ github.workspace }}/qx/filter"
 
 jobs:
-  update-filter:
+  update-qx-filter:
     runs-on: ubuntu-latest
 
     steps:
@@ -45,7 +45,7 @@ jobs:
 
     - name: Run Converter
       run: |
-        mkdir -p "$FILTER_OUTPUT_DIR"
+        mkdir -p "$OUTPUT_DIR"
         python tools/converter.py
 
     - name: Commit and push changes
