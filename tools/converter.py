@@ -147,7 +147,7 @@ def sort_dict(obj):
         return obj
 
 def convert_list_to_outputs(content, link, file_name_base, output_directory):
-    """List 转 JSON & SRS"""
+    """List 转 QX List, sing-box JSON & 编译 SRS"""
     try:
         df = parse_and_convert_content_to_dataframe(content)
         if df.empty:
@@ -157,6 +157,29 @@ def convert_list_to_outputs(content, link, file_name_base, output_directory):
         df = df[~df['pattern'].str.contains('#', na=False)].reset_index(drop=True)
         df = df[df['pattern'].isin(MAP_DICT.keys())].reset_index(drop=True)
         df = df.drop_duplicates().reset_index(drop=True)
+
+        # 1. 生成 Quantumult X 格式的 .list 文件
+        list_lines = []
+        for _, row in df.iterrows():
+            pat = row['pattern'].upper()
+            addr = row['address']
+            # 如果是 IP，智能区分 IPv4 和 IPv6 格式
+            if pat in ('IP-CIDR', 'IP-CIDR6', 'IP6-CIDR'):
+                try:
+                    net = ipaddress.ip_network(addr, strict=False)
+                    if net.version == 6:
+                        pat = 'IP-CIDR6'
+                    else:
+                        pat = 'IP-CIDR'
+                except:
+                    pass
+            list_lines.append(f"{pat},{addr}")
+
+        list_file_path = os.path.join(output_directory, f"{file_name_base}.list")
+        with open(list_file_path, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(list_lines) + '\n')
+
+        # 2. 转换 Pattern 为 sing-box 格式以生成 JSON
         df['pattern'] = df['pattern'].replace(MAP_DICT)
 
         result_rules = {"version": 2, "rules": []}
@@ -181,9 +204,10 @@ def convert_list_to_outputs(content, link, file_name_base, output_directory):
             result_rules_str = result_rules_str.replace('\\\\', '\\')
             output_file.write(result_rules_str)
 
+        # 3. 编译出 .srs 文件
         srs_path = json_file_path.replace(".json", ".srs")
         os.system(f"sing-box rule-set compile --output {srs_path} {json_file_path}")
-        print(f"Successfully generated (List -> JSON & SRS): {json_file_path} and {srs_path}")
+        print(f"Successfully generated (List -> List, JSON & SRS): {list_file_path}, {json_file_path} and {srs_path}")
         return json_file_path
     except Exception as e:
         print(f'处理 List 链接出错，已跳过：{link}，原因：{str(e)}')
@@ -262,7 +286,6 @@ if __name__ == "__main__":
     # 1. 确定 rules 文件路径
     rules_path = args.rules_file
     if not rules_path:
-        # 默认回退到脚本同级目录下的 rules.txt
         script_dir = os.path.dirname(os.path.abspath(__file__))
         rules_path = os.path.join(script_dir, 'rules.txt')
 
