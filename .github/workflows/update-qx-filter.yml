@@ -3,7 +3,7 @@ name: update-qx-filter
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: '0 0 * * *' # 可选：每天定时自动执行
+  #   - cron: '0 0 * * *'
 
 permissions:
   contents: write
@@ -11,9 +11,6 @@ permissions:
 concurrency:
   group: commit-to-main
   cancel-in-progress: false
-
-env:
-  OUTPUT_DIR: "${{ github.workspace }}/qx/filter"
 
 jobs:
   update-qx-filter:
@@ -45,15 +42,18 @@ jobs:
 
     - name: Run Converter
       run: |
-        mkdir -p "$OUTPUT_DIR"
-        python tools/converter.py
+        # 直接通过参数传递：参数1是 rules.txt 路径，参数2是输出目录
+        python tools/converter.py tools/rules.txt qx/filter
 
     - name: Commit and push changes
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         
-        git add "$FILTER_OUTPUT_DIR"/*.list
+        # 记得把生成的 .list, .json 和 .srs 都加入 git 追踪
+        git add qx/filter/*.list
+        # git add qx/filter/*.json
+        # git add qx/filter/*.srs
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
