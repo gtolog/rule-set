@@ -3,6 +3,10 @@ https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/china-ipv6.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/telegram-ipv4.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/telegram-ipv6.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/whatsapp-ipv4.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-!china-ipv4.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-!china-ipv6.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-china-ipv4.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-china-ipv6.cidr
 
 https://raw.githubusercontent.com/gtolog/rule-set/main/qx/filter/domain/gto-proxy-domain.list
 https://raw.githubusercontent.com/gtolog/rule-set/main/qx/filter/ip/gto-home-ip.list
