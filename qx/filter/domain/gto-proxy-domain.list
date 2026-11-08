@@ -1,0 +1,164 @@
+# AUTHOR:
+# REPO: https://github.com/gtolog/rule-set
+# UPDATED: 2025-04-07 10:18:00
+# HOST: 0
+# HOST-KEYWORD: 0
+# HOST-SUFFIX: 33
+# IP-CIDR: 6
+# IP6-CIDR: 0
+# USER-AGENT: 0
+# TOTAL: 39
+# COMMENTS: manually maintained
+# CREATED: 2025-03-18 13:48:00
+
+# common
+HOST-SUFFIX,sagernet.org
+HOST-SUFFIX,greasyfork.org
+HOST-SUFFIX,leiting.io
+HOST-SUFFIX,leiting.uniss.me
+HOST-SUFFIX,nn8qozmu.top
+HOST-SUFFIX,bandwagonhost.com
+HOST-SUFFIX,openwrt.org
+HOST-SUFFIX,apkmirror.com
+HOST-SUFFIX,uscardforum.com
+HOST-SUFFIX,jellyfin.org
+HOST-SUFFIX,strem.io
+HOST-SUFFIX,strem.fun
+HOST-SUFFIX,thexem.info
+HOST-SUFFIX,imgflip.com
+HOST-SUFFIX,brew.sh
+HOST-SUFFIX,kernel.org
+HOST-SUFFIX,arin.net
+HOST-SUFFIX,opensubtitles.com
+HOST-SUFFIX,omdbapi.com
+HOST-SUFFIX,routinehub.io
+HOST-SUFFIX,routinehub.co
+HOST-SUFFIX,appraven.net
+HOST-SUFFIX,picsum.photos
+HOST-SUFFIX,ko-fi.com
+HOST-SUFFIX,ipify.org
+
+# synology
+HOST,global.synologydownload.com
+HOST,global.sns.cs.quickconnect.to
+
+# tubi
+HOST-SUFFIX,tubi.tv
+HOST-SUFFIX,tubitv.com
+HOST-SUFFIX,tubi.io
+HOST-SUFFIX,tubi.video
+HOST-SUFFIX,adrise.tv
+HOST-SUFFIX,licensekeyserver.com
+
+# m-team
+HOST-SUFFIX,m-team.cc
+HOST-SUFFIX,m-team.io
+HOST-SUFFIX,m-team.co
+
+# torrent
+HOST-SUFFIX,rutracker.org
+HOST-SUFFIX,rutracker.ru
+HOST-SUFFIX,yts.mx
+HOST-SUFFIX,bt4gprx.com
+HOST-SUFFIX,bt4g.com
+
+# live
+HOST-SUFFIX,moveonjoy.com
+HOST-SUFFIX,thetvapp.to
+HOST-SUFFIX,warnermediacdn.com
+HOST-SUFFIX,akamaized.net
+HOST-SUFFIX,gvt1.com
+HOST-SUFFIX,vustreams.com
+HOST-SUFFIX,amagi.tv
+HOST-SUFFIX,cdn1host.online
+HOST-SUFFIX,aktv.top
+HOST-SUFFIX,m16tv.cfd
+HOST-SUFFIX,tvpass.org
+
+HOST-SUFFIX,transmissionbt.com
+
+# openai and grok
+HOST-SUFFIX,featureassets.org
+
+# amazon
+HOST-SUFFIX,arkoselabs.com
+HOST-SUFFIX,amazon.dev
+HOST-SUFFIX,amazonalexa.com
+HOST-SUFFIX,amazon-dss.com
+
+# home-assistant
+HOST-SUFFIX,cartocdn.com
+
+# etsy
+HOST-SUFFIX,etsy.com
+HOST-SUFFIX,etsystatic.com
+
+# temu
+HOST-SUFFIX,temu.com
+HOST-SUFFIX,temucdn.com
+HOST-SUFFIX,temuapps.com
+HOST-SUFFIX,kwcdn.com
+
+# F-Droid
+HOST-SUFFIX,f-droid.org
+
+# pbs
+HOST-SUFFIX,pbs.org
+HOST-SUFFIX,pbskids.org
+
+# Stremio
+HOST-SUFFIX,stremio.com
+HOST-SUFFIX,strem.io
+HOST-SUFFIX,strem.fun
+HOST-SUFFIX,strem.bar
+HOST-SUFFIX,elfhosted.com
+HOST-SUFFIX,baby-beamup.club
+HOST-SUFFIX,justwatch.com
+HOST-SUFFIX,themoviedb.org
+# Stremio The Movie Database Addon
+HOST-SUFFIX,tmdb.org
+HOST-SUFFIX,metahub.space
+HOST-SUFFIX,fanart.tv
+
+HOST-SUFFIX,addic7ed.com
+HOST-SUFFIX,allawnos.com
+HOST-SUFFIX,in.appcenter.ms
+
+# dockerhub1.beget.com
+HOST-SUFFIX,beget.com
+
+# Huggingface
+HOST-SUFFIX,huggingface.co
+HOST-SUFFIX,hf.co
+
+# Append new domain via Shortcut
+HOST-SUFFIX,apibay.org
+# Append new domain via Shortcut
+HOST-SUFFIX,repcz.link
+
+# Append new domain via Shortcut
+HOST-SUFFIX,529059.xyz
+# Append new domain via Shortcut
+HOST-SUFFIX,gitbook.io
+# Append new domain via Shortcut
+HOST-SUFFIX,boxjs.app
+
+# Append new domain via Shortcut
+HOST-SUFFIX,slideshare.com
+HOST-SUFFIX,slideshare.net
+HOST-SUFFIX,slidesharecdn.com
+
+# Append new domain via Shortcut
+HOST-SUFFIX,izzysoft.de
+# Append new domain via Shortcut
+HOST-SUFFIX,garyshare.sharewithyou.dpdns.org
+
+# Append new domain via Shortcut
+HOST-SUFFIX,huecker.io
+
+# Append new domain via Shortcut
+HOST-SUFFIX,nodeseek.com
+# Append new domain via Shortcut
+HOST-SUFFIX,hysteria.network
+# Append new domain via Shortcut
+HOST-SUFFIX,ermao.net
