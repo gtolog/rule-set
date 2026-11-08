@@ -10,7 +10,6 @@ https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/goog
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/google-gemini.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/netflix.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/openai.json
-https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/proxy.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/reddit.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/spotify.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/telegram.json
@@ -21,3 +20,4 @@ https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/verc
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/whatsapp.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/wikimedia.json
 https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/xai.json
+https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo-lite/geosite/proxy.json
