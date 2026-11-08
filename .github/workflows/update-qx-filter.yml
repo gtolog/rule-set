@@ -44,6 +44,7 @@ jobs:
       run: |
         # 直接通过参数传递：参数1是 rules.txt 路径，参数2是输出目录
         python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain"
+        python tools/converter.py "tools/sing-box-geoip" "qx/filter/ip"
 
     - name: Commit and push changes
       run: |
@@ -52,6 +53,7 @@ jobs:
         
         # 记得把生成的 .list, .json 和 .srs 都加入 git 追踪
         git add qx/filter/domain/*.list
+        git add qx/filter/ip/*.list
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
