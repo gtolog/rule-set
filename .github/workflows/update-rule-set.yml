@@ -55,8 +55,8 @@ jobs:
         # 记得把生成的 .list, .json 和 .srs 都加入 git 追踪
         git add qx/filter/domain/*.list
         git add qx/filter/ip/*.list
-        git add qx/sing-box/*.json
-        git add qx/sing-box/*.srs
+        git add sing-box/*.json
+        git add sing-box/*.srs
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
