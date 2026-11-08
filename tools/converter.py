@@ -251,32 +251,42 @@ def process_file(link, output_directory):
         return convert_list_to_outputs(content, link, file_name_base, output_directory)
 
 if __name__ == "__main__":
-    # 1. 优先读取环境变量
-    links = os.getenv('LIST_TO_BE_CONVERTED', '').split()
+    parser = argparse.ArgumentParser(description="Convert between Quantumult X list files and sing-box JSON/SRS files.")
+    parser.add_argument('rules_file', nargs='?', default=None, 
+                        help='Path to the rules file (e.g., tools/rules.txt)')
+    parser.add_argument('output_dir', nargs='?', default='./output', 
+                        help='Directory to save generated files')
+    
+    args = parser.parse_args()
 
-    # 2. 其次读取命令行参数
-    if not links:
-        parser = argparse.ArgumentParser(description="Process list or json rule files.")
-        parser.add_argument('links', metavar='L', type=str, nargs='*', 
-                            help='List of file URLs or paths to process')
-        args = parser.parse_args()
-        links = args.links
-
-    # 3. 最后尝试读取 tools/rules.txt 文件（自动关联脚本所在目录）
-    if not links:
+    # 1. 确定 rules 文件路径
+    rules_path = args.rules_file
+    if not rules_path:
+        # 默认回退到脚本同级目录下的 rules.txt
         script_dir = os.path.dirname(os.path.abspath(__file__))
         rules_path = os.path.join(script_dir, 'rules.txt')
-        if os.path.exists(rules_path):
-            with open(rules_path, 'r', encoding='utf-8') as f:
-                links = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
 
-    if not links:
-        print("Error: No links or files specified to convert!")
+    # 2. 读取 rules 文件内容
+    links = []
+    if os.path.exists(rules_path):
+        with open(rules_path, 'r', encoding='utf-8') as f:
+            links = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+    else:
+        print(f"Error: Rules file not found at {rules_path}")
         exit(1)
 
-    output_dir = os.getenv('OUTPUT_DIR', './output')
-    result_file_names = []
+    if not links:
+        print(f"Error: No valid links or files found in {rules_path}")
+        exit(1)
 
+    # 3. 确定输出目录
+    output_dir = args.output_dir
+    os.makedirs(output_dir, exist_ok=True)
+
+    print(f"Using rules file: {rules_path}")
+    print(f"Output directory: {output_dir}")
+
+    result_file_names = []
     for link in links:
         result_file_name = process_file(link, output_directory=output_dir)
         if result_file_name:
