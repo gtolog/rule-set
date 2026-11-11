@@ -30,7 +30,6 @@ jobs:
 
           sed -i "s/[[:space:]]//g" *.list
           
-          # 使用 Python 合并中国 IPv4/IPv6
           python3 -c '
           import ipaddress, sys
           def merge_cidrs(input_files, output_file):
@@ -48,7 +47,6 @@ jobs:
               with open(output_file, "w") as f:
                   f.write("\n".join(str(n) for n in collapsed) + "\n")
 
-          merge_nic = merge_cidrs
           merge_cidrs(["apnic-ipv4.list", "bgp-ipv4.list"], "ipcidr/china-ipv4.cidr")
           merge_cidrs(["apnic-ipv6.list", "bgp-ipv6.list"], "ipcidr/china-ipv6.cidr")
           '
@@ -116,8 +114,12 @@ jobs:
           with open("goog.json") as f:
               data = json.load(f)
 
-          v4 = [ipaddress.ip_network(p["ipv4Prefix"], strict=False) for p in data.get("prefixes", []) if "ipv4Prefix" in p]
-          v6 = [ipaddress.ip_network(p["ipv6Prefix"], strict=False) for p in data.get("ipv6_prefixes", []) if "ipv6Prefix" in p]
+          v4, v6 = [], []
+          for p in data.get("prefixes", []):
+              if "ipv4Prefix" in p:
+                  v4.append(ipaddress.ip_network(p["ipv4Prefix"], strict=False))
+              if "ipv6Prefix" in p:
+                  v6.append(ipaddress.ip_network(p["ipv6Prefix"], strict=False))
 
           with open("ipcidr/google-ipv4.cidr", "w") as f:
               f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4))) + "\n")
@@ -134,8 +136,12 @@ jobs:
           with open("cloud.json") as f:
               data = json.load(f)
 
-          v4 = [ipaddress.ip_network(p["ipv4Prefix"], strict=False) for p in data.get("prefixes", []) if "ipv4Prefix" in p]
-          v6 = [ipaddress.ip_network(p["ipv6Prefix"], strict=False) for p in data.get("ipv6_prefixes", []) if "ipv6Prefix" in p]
+          v4, v6 = [], []
+          for p in data.get("prefixes", []):
+              if "ipv4Prefix" in p:
+                  v4.append(ipaddress.ip_network(p["ipv4Prefix"], strict=False))
+              if "ipv6Prefix" in p:
+                  v6.append(ipaddress.ip_network(p["ipv6Prefix"], strict=False))
 
           with open("ipcidr/google-cloud-ipv4.cidr", "w") as f:
               f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4))) + "\n")
@@ -156,5 +162,5 @@ jobs:
             exit 0
           fi
           
-          git commit -m "Update IP CIDR lists (Python native collapse): $(date --rfc-3339=sec)"
+          git commit -m "Update IP CIDR lists (Fix Google IPv6 extraction): $(date --rfc-3339=sec)"
           git push
