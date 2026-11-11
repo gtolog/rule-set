@@ -52,28 +52,6 @@ jobs:
           '
           rm *.list
 
-      - name: Fetch and process Telegram IP lists
-        run: |
-          curl -s https://core.telegram.org/resources/cidr.txt > telegram_raw.txt
-          python3 -c '
-          import ipaddress
-          with open("telegram_raw.txt") as f:
-              lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-
-          # 补充官方 cidr.txt 未包含的 Telegram 网段 Sub-allocated range 95.161.64.0/20
-          extra_v4 = ["95.161.64.0/20"]
-          lines.extend(extra_v4)
-          
-          v4_nets = [ipaddress.ip_network(l, strict=False) for l in lines if "." in l]
-          v6_nets = [ipaddress.ip_network(l, strict=False) for l in lines if ":" in l]
-
-          with open("ipcidr/telegram-ipv4.cidr", "w") as f:
-              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4_nets))) + "\n")
-          with open("ipcidr/telegram-ipv6.cidr", "w") as f:
-              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6_nets))) + "\n")
-          '
-          rm telegram_raw.txt
-
       - name: Fetch and process AWS IP lists
         run: |
           curl -s https://ip-ranges.amazonaws.com/ip-ranges.json > ip-ranges.json
@@ -154,6 +132,48 @@ jobs:
           '
           rm cloud.json
 
+      - name: Fetch and process Social/Messaging IP lists (Telegram, Facebook, Twitter)
+        run: |
+          python3 -c '
+          import urllib.request, ipaddress
+
+          targets = {
+              "telegram": "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/text/telegram.txt",
+              "facebook": "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/text/facebook.txt",
+              "twitter": "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/text/twitter.txt"
+          }
+
+          for name, url in targets.items():
+              try:
+                  req = urllib.request.Request(url, headers={"User-Agent": "GitHubActions-IPUpdater/1.0"})
+                  with urllib.request.urlopen(req) as resp:
+                      lines = resp.read().decode("utf-8").splitlines()
+              except Exception as e:
+                  print(f"Error fetching {name} from {url}: {e}")
+                  continue
+
+              v4_nets, v6_nets = [], []
+              for line in lines:
+                  line = line.strip()
+                  if line and not line.startswith("#"):
+                      try:
+                          net = ipaddress.ip_network(line, strict=False)
+                          if net.version == 4:
+                              v4_nets.append(net)
+                          elif net.version == 6:
+                              v6_nets.append(net)
+                      except ValueError:
+                          pass
+
+              # 写入 IPv4
+              with open(f"ipcidr/{name}-ipv4.cidr", "w") as f:
+                  f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4_nets))) + "\n")
+
+              # 写入 IPv6
+              with open(f"ipcidr/{name}-ipv6.cidr", "w") as f:
+                  f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6_nets))) + "\n")
+          '
+
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
@@ -166,5 +186,5 @@ jobs:
             exit 0
           fi
           
-          git commit -m "Update IP CIDR lists (Fix Google IPv6 extraction): $(date --rfc-3339=sec)"
+          git commit -m "Update IP CIDR lists: $(date --rfc-3339=sec)"
           git push
