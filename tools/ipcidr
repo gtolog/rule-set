@@ -1,9 +1,10 @@
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/china-ipv4.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/china-ipv6.cidr
-https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/telegram-ipv4.cidr
-https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/telegram-ipv6.cidr
-https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/whatsapp-ipv4.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-!china-ipv4.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-!china-ipv6.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-china-ipv4.cidr
 https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/amazon-china-ipv6.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/google-ipv4.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/google-ipv6.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/google-cloud-ipv4.cidr
+https://raw.githubusercontent.com/gtolog/rule-set/main/ipcidr/google-cloud-ipv6.cidr
