@@ -33,23 +33,46 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-        
+
+    # 1. 缓存 Python Pip 依赖，避免每次重复下载
+    - name: Cache Pip Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pandas requests pyyaml
 
+    # 2. 缓存 sing-box 二进制文件（基于版本号）
+    - name: Cache sing-box binary
+      id: cache-sing-box
+      uses: actions/cache@v4
+      with:
+        path: bin/sing-box
+        key: ${{ runner.os }}-sing-box-v1.11.7
+
+    # 3. 如果缓存未命中，则下载轻量级 tar.gz 并解压（免去 dpkg 和 sudo 消耗）
     - name: Setup sing-box
-      env:
-        SING_BOX_DEB_URL: "https://github.com/SagerNet/sing-box/releases/download/v1.11.7/sing-box_1.11.7_linux_amd64.deb"
+      if: steps.cache-sing-box.outputs.cache-hit != 'true'
       run: |
         set -Eeuo pipefail
-        wget -O sing-box.deb "$SING_BOX_DEB_URL"
-        sudo dpkg -i sing-box.deb
+        mkdir -p bin
+        VERSION="1.11.7"
+        wget -O sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/v${VERSION}/sing-box-${VERSION}-linux-amd64.tar.gz"
+        tar -xzf sing-box.tar.gz
+        mv sing-box-${VERSION}-linux-amd64/sing-box bin/
+        rm -rf sing-box*
+
+    - name: Add sing-box to PATH
+      run: echo "$PWD/bin" >> $GITHUB_PATH
 
     - name: Run Converter
       run: |
-        # 直接通过参数传递：参数1是 rules.txt 路径，参数2是输出目录
         python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain"
         python tools/converter.py "tools/ipcidr" "qx/filter/ip"
         python tools/converter.py "tools/ipcidr" "sing-box"
@@ -60,7 +83,6 @@ jobs:
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         
-        # 记得把生成的 .list, .json 和 .srs 都加入 git 追踪
         git add qx/filter/domain/*.list
         git add qx/filter/ip/*.list
         git add sing-box/*.json
