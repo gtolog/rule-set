@@ -1,10 +1,8 @@
 name: update-ipcidr
 
 on:
-  # 定时触发：每天北京时间早上 8 点运行 (UTC 0:00)
   schedule:
     - cron: '0 0 * * *'
-  # 允许在 GitHub Actions 页面手动触发
   workflow_dispatch:
 
 permissions:
@@ -20,87 +18,131 @@ jobs:
       - name: Create target directory
         run: mkdir -p ipcidr
 
-      - name: Download cidr-merger tool
-        run: |
-          CIDR_MERGER_URL=$(curl -s https://api.github.com/repos/zhanhb/cidr-merger/releases/latest | grep -Po '(?<=download_url\").*linux-amd64' | sed "s/^...//")
-          wget -O cidr-merger "$CIDR_MERGER_URL"
-          chmod +x cidr-merger
-
       - name: Fetch and process China IP lists
         run: |
-          # 1. 下载原始数据源
           curl -s -o bgp-ipv4.list "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china.txt"
           curl -s -o bgp-ipv6.list "https://raw.githubusercontent.com/gaoyifan/china-operator-ip/ip-lists/china6.txt"
           curl -s "https://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest" > apnic.txt
           
-          # 2. 解析 APNIC 数据
           cat apnic.txt | grep ipv4 | grep CN | awk -F\| '{ printf("%s/%d\n", $4, 32-log($5)/log(2)) }' > apnic-ipv4.list
           cat apnic.txt | grep "|CN|ipv6|" | cut -d"|" -f"4,5" | tr "|" "/" > apnic-ipv6.list
           rm apnic.txt
 
-          # 3. 清理格式并合并输出中国主列表
-          sed -i "s/[[:space:]]//g" *.list 
-          cat *ipv4.list | ./cidr-merger -s > ipcidr/china-ipv4.cidr
-          cat *ipv6.list | ./cidr-merger -s > ipcidr/china-ipv6.cidr
+          sed -i "s/[[:space:]]//g" *.list
+          
+          # 使用 Python 合并中国 IPv4/IPv6
+          python3 -c '
+          import ipaddress, sys
+          def merge_cidrs(input_files, output_file):
+              nets = []
+              for fname in input_files:
+                  with open(fname) as f:
+                      for line in f:
+                          line = line.strip()
+                          if line:
+                              try:
+                                  nets.append(ipaddress.ip_network(line, strict=False))
+                              except ValueError:
+                                  pass
+              collapsed = sorted(ipaddress.collapse_addresses(nets))
+              with open(output_file, "w") as f:
+                  f.write("\n".join(str(n) for n in collapsed) + "\n")
+
+          merge_nic = merge_cidrs
+          merge_cidrs(["apnic-ipv4.list", "bgp-ipv4.list"], "ipcidr/china-ipv4.cidr")
+          merge_cidrs(["apnic-ipv6.list", "bgp-ipv6.list"], "ipcidr/china-ipv6.cidr")
+          '
           rm *.list
 
       - name: Fetch and process Telegram IP lists
         run: |
           curl -s https://core.telegram.org/resources/cidr.txt > telegram_raw.txt
-          # 使用 Python 分离 IPv4 和 IPv6
           python3 -c '
+          import ipaddress
           with open("telegram_raw.txt") as f:
               lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-          v4 = [l for l in lines if "." in l]
-          v6 = [l for l in lines if ":" in l]
-          with open("telegram-v4.list", "w") as f:
-              f.write("\n".join(v4) + "\n")
-          with open("telegram-v6.list", "w") as f:
-              f.write("\n".join(v6) + "\n")
+          
+          v4_nets = [ipaddress.ip_network(l, strict=False) for l in lines if "." in l]
+          v6_nets = [ipaddress.ip_network(l, strict=False) for l in lines if ":" in l]
+
+          with open("ipcidr/telegram-ipv4.cidr", "w") as f:
+              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4_nets))) + "\n")
+          with open("ipcidr/telegram-ipv6.cidr", "w") as f:
+              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6_nets))) + "\n")
           '
-          ./cidr-merger -s < telegram-v4.list > ipcidr/telegram-ipv4.cidr
-          ./cidr-merger -s < telegram-v6.list > ipcidr/telegram-ipv6.cidr
-          rm telegram_raw.txt telegram-v4.list telegram-v6.list
+          rm telegram_raw.txt
 
       - name: Fetch and process AWS IP lists
         run: |
           curl -s https://ip-ranges.amazonaws.com/ip-ranges.json > ip-ranges.json
-          # 使用 Python 解析 AWS JSON 并根据 region 是否以 cn- 开头分类
           python3 -c '
-          import json
+          import json, ipaddress
           with open("ip-ranges.json") as f:
               data = json.load(f)
 
           amzn_china_v4, amzn_non_china_v4 = [], []
           amzn_china_v6, amzn_non_china_v6 = [], []
 
-          for prefix in data.get("prefixes", []):
-              ip = prefix.get("ip_prefix")
-              region = prefix.get("region", "")
-              if region.startswith("cn"):
-                  amzn_china_v4.append(ip)
+          for p in data.get("prefixes", []):
+              net = ipaddress.ip_network(p["ip_prefix"], strict=False)
+              if p.get("region", "").startswith("cn"):
+                  amzn_china_v4.append(net)
               else:
-                  amzn_non_china_v4.append(ip)
+                  amzn_non_china_v4.append(net)
 
-          for prefix in data.get("ipv6_prefixes", []):
-              ip = prefix.get("ipv6_prefix")
-              region = prefix.get("region", "")
-              if region.startswith("cn"):
-                  amzn_china_v6.append(ip)
+          for p in data.get("ipv6_prefixes", []):
+              net = ipaddress.ip_network(p["ipv6_prefix"], strict=False)
+              if p.get("region", "").startswith("cn"):
+                  amzn_china_v6.append(net)
               else:
-                  amzn_non_china_v6.append(ip)
+                  amzn_non_china_v6.append(net)
 
-          with open("amzn-china-v4.list", "w") as f: f.write("\n".join(amzn_china_v4) + "\n")
-          with open("amzn-non-china-v4.list", "w") as f: f.write("\n".join(amzn_non_china_v4) + "\n")
-          with open("amzn-china-v6.list", "w") as f: f.write("\n".join(amzn_china_v6) + "\n")
-          with open("amzn-non-china-v6.list", "w") as f: f.write("\n".join(amzn_non_china_v6) + "\n")
+          def write_cidr(nets, path):
+              with open(path, "w") as f:
+                  f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(nets))) + "\n")
+
+          write_cidr(amzn_china_v4, "ipcidr/amazon-china-ipv4.cidr")
+          write_cidr(amzn_non_china_v4, "ipcidr/amazon-!china-ipv4.cidr")
+          write_cidr(amzn_china_v6, "ipcidr/amazon-china-ipv6.cidr")
+          write_cidr(amzn_non_china_v6, "ipcidr/amazon-!china-ipv6.cidr")
           '
-          ./cidr-merger -s < amzn-china-v4.list > ipcidr/amazon-china-ipv4.cidr
-          ./cidr-merger -s < amzn-non-china-v4.list > ipcidr/amazon-!china-ipv4.cidr
-          ./cidr-merger -s < amzn-china-v6.list > ipcidr/amazon-china-ipv6.cidr
-          ./cidr-merger -s < amzn-non-china-v6.list > ipcidr/amazon-!china-ipv6.cidr
+          rm ip-ranges.json
 
-          rm ip-ranges.json amzn-china-v4.list amzn-non-china-v4.list amzn-china-v6.list amzn-non-china-v6.list cidr-merger
+      - name: Fetch and process Google IP lists (goog.json)
+        run: |
+          curl -s https://www.gstatic.com/ipranges/goog.json > goog.json
+          python3 -c '
+          import json, ipaddress
+          with open("goog.json") as f:
+              data = json.load(f)
+
+          v4 = [ipaddress.ip_network(p["ipv4Prefix"], strict=False) for p in data.get("prefixes", []) if "ipv4Prefix" in p]
+          v6 = [ipaddress.ip_network(p["ipv6Prefix"], strict=False) for p in data.get("ipv6_prefixes", []) if "ipv6Prefix" in p]
+
+          with open("ipcidr/google-ipv4.cidr", "w") as f:
+              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4))) + "\n")
+          with open("ipcidr/google-ipv6.cidr", "w") as f:
+              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6))) + "\n")
+          '
+          rm goog.json
+
+      - name: Fetch and process Google Cloud IP lists (cloud.json)
+        run: |
+          curl -s https://www.gstatic.com/ipranges/cloud.json > cloud.json
+          python3 -c '
+          import json, ipaddress
+          with open("cloud.json") as f:
+              data = json.load(f)
+
+          v4 = [ipaddress.ip_network(p["ipv4Prefix"], strict=False) for p in data.get("prefixes", []) if "ipv4Prefix" in p]
+          v6 = [ipaddress.ip_network(p["ipv6Prefix"], strict=False) for p in data.get("ipv6_prefixes", []) if "ipv6Prefix" in p]
+
+          with open("ipcidr/google-cloud-ipv4.cidr", "w") as f:
+              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v4))) + "\n")
+          with open("ipcidr/google-cloud-ipv6.cidr", "w") as f:
+              f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6))) + "\n")
+          '
+          rm cloud.json
 
       - name: Commit and push changes
         run: |
@@ -114,5 +156,5 @@ jobs:
             exit 0
           fi
           
-          git commit -m "Update IP CIDR lists (China, Telegram, AWS): $(date --rfc-3339=sec)"
+          git commit -m "Update IP CIDR lists (Python native collapse): $(date --rfc-3339=sec)"
           git push
