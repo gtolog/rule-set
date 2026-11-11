@@ -59,6 +59,10 @@ jobs:
           import ipaddress
           with open("telegram_raw.txt") as f:
               lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+
+          # 补充官方 cidr.txt 未包含的 Telegram 网段 Sub-allocated range 95.161.64.0/20
+          extra_v4 = ["95.161.64.0/20"]
+          lines.extend(extra_v4)
           
           v4_nets = [ipaddress.ip_network(l, strict=False) for l in lines if "." in l]
           v6_nets = [ipaddress.ip_network(l, strict=False) for l in lines if ":" in l]
