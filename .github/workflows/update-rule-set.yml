@@ -51,7 +51,6 @@ jobs:
       run: |
         # 直接通过参数传递：参数1是 rules.txt 路径，参数2是输出目录
         python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain"
-        python tools/converter.py "tools/sing-box-geoip" "qx/filter/ip"
         python tools/converter.py "tools/ipcidr" "qx/filter/ip"
         python tools/converter.py "tools/ipcidr" "sing-box"
         python tools/converter.py "tools/qxlist" "sing-box"
