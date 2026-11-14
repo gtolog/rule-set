@@ -82,9 +82,9 @@ jobs:
                   f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(nets))) + "\n")
 
           write_cidr(amzn_china_v4, "ipcidr/amazon-china-ipv4.cidr")
-          write_cidr(amzn_non_china_v4, "ipcidr/amazon-!china-ipv4.cidr")
+          write_cidr(amzn_non_china_v4, "ipcidr/amazon-non-china-ipv4.cidr")
           write_cidr(amzn_china_v6, "ipcidr/amazon-china-ipv6.cidr")
-          write_cidr(amzn_non_china_v6, "ipcidr/amazon-!china-ipv6.cidr")
+          write_cidr(amzn_non_china_v6, "ipcidr/amazon-non-china-ipv6.cidr")
           '
           rm ip-ranges.json
 
