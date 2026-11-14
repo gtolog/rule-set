@@ -175,3 +175,5 @@ HOST-SUFFIX,thetvdb.com
 HOST-SUFFIX,greatfire.org
 # Append new domain via Shortcut
 HOST-SUFFIX,gfwatch.org
+# Append new domain via Shortcut
+HOST-SUFFIX,gfweb.ca
