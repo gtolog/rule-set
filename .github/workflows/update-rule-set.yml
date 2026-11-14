@@ -94,8 +94,8 @@ jobs:
         git add qx/filter/ip/*.list
         git add sing-box/*.json
         git add sing-box/*.srs
-        git add xray/domain/*.json
-        git add xray/ip/*.json
+        git add xray/domain/
+        git add xray/ip/
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
