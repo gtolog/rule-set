@@ -34,7 +34,7 @@ jobs:
       with:
         python-version: '3.10'
 
-    # 1. 缓存 Python Pip 依赖，避免每次重复下载
+    # 1. 缓存 Python Pip 依赖
     - name: Cache Pip Dependencies
       uses: actions/cache@v4
       with:
@@ -48,7 +48,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pandas requests pyyaml
 
-    # 2. 缓存 sing-box 二进制文件（基于版本号）
+    # 2. 缓存 sing-box 二进制文件
     - name: Cache sing-box binary
       id: cache-sing-box
       uses: actions/cache@v4
@@ -56,7 +56,6 @@ jobs:
         path: bin/sing-box
         key: ${{ runner.os }}-sing-box-v1.11.7
 
-    # 3. 如果缓存未命中，则下载轻量级 tar.gz 并解压（免去 dpkg 和 sudo 消耗）
     - name: Setup sing-box
       if: steps.cache-sing-box.outputs.cache-hit != 'true'
       run: |
@@ -71,23 +70,31 @@ jobs:
     - name: Add sing-box to PATH
       run: echo "$PWD/bin" >> $GITHUB_PATH
 
-    - name: Run Converter
+    # 3. 设置 Go 环境
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Run Converter (QX & sing-box)
       run: |
         python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain" --target qx
         python tools/converter.py "tools/ipcidr" "qx/filter/ip" --target qx
         python tools/converter.py "tools/ipcidr" "sing-box" --target singbox
         python tools/converter.py "tools/qxlist" "sing-box" --target singbox
 
-        # 生成 Xray 纯文本规则源
+    # 4. 生成 Xray 纯文本规则源并编译 dat
+    - name: Build Xray Dat Files
+      run: |
+        mkdir -p xray/ip xray/domain
+
         find qx/filter/ip -name "*.list" > ip_file_list
         python tools/converter.py ip_file_list "xray/ip" --target xray-ip
 
         find qx/filter/domain -name "*.list" > domain_file_list
         python tools/converter.py domain_file_list "xray/domain" --target xray-domain
 
-    - name: Compile for xray
-      run: |
-        # 编译 domain-list-community (已支持正则表达式)
+        # 编译 domain-list-community
         go install github.com/v2fly/domain-list-community@latest
         $(go env GOPATH)/bin/domain-list-community --datapath=./xray/domain --outputname=xray.domain.dat --outputdir=./xray
 
@@ -120,22 +127,20 @@ jobs:
         
         $(go env GOPATH)/bin/geoip -c geoip-config.json
 
-    - name: Commit and push changes
+    # 5. 【新增】将生成的所有产物统一打包并同步到 release 分支
+    - name: Prepare Release Artifacts
       run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        
-        git add qx/filter/domain/*.list
-        git add qx/filter/ip/*.list
-        git add sing-box/*.json
-        git add sing-box/*.srs
-        git add xray/
+        mkdir -p release_stage
+        # 将需要的目录复制到临时发布目录中
+        cp -r qx release_stage/
+        cp -r sing-box release_stage/
+        cp -r xray release_stage/
 
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-          exit 0
-        else
-          git commit -m "Auto-update rules: synchronize list, json & srs"
-          git pull --rebase
-          git push origin main
-        fi
+    - name: Deploy to release branch
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./release_stage
+        publish_branch: release
+        commit_message: "Auto-update rules: sync QX, sing-box & Xray dat files"
+        force_orphan: false
