@@ -124,15 +124,21 @@ jobs:
         EOF
         
         $(go env GOPATH)/bin/geoip -c geoip-config.json
-
-    # 5. 【新增】将生成的所有产物统一打包并同步到 release 分支
+        
     - name: Prepare Release Artifacts
       run: |
         mkdir -p release_stage
-        # 将需要的目录复制到临时发布目录中
-        cp -r qx release_stage/
-        cp -r sing-box release_stage/
-        cp -r xray release_stage/
+        
+        # 1. 尝试从远程 release 分支拉取现有的所有产物目录（如果分支刚创建为空，则忽略错误继续）
+        git fetch origin release --depth=1 || true
+        git checkout origin/release -- ipcidr qx sing-box xray 2>/dev/null || true
+        
+        # 2. 如果本地存在这些目录，则全部移入发布暂存区
+        for dir in ipcidr qx sing-box xray; do
+          if [ -d "$dir" ]; then
+            cp -r "$dir" release_stage/
+          fi
+        done
 
     - name: Deploy to release branch
       uses: peaceiris/actions-gh-pages@v3
@@ -140,5 +146,5 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./release_stage
         publish_branch: release
-        commit_message: "Auto-update rules: sync QX, sing-box & Xray dat files"
+        commit_message: "Auto-update rules and dat files: $(date --rfc-3339=sec)"
         force_orphan: false
