@@ -80,7 +80,9 @@ def parse_to_dataframe(content):
                     if isinstance(values, str):
                         values = [values]
                     for val in values:
-                        rows.append({'pattern': qx_pat, 'address': str(val).strip()})
+                        clean_val = str(val).split('#')[0].strip()
+                        if clean_val:
+                            rows.append({'pattern': qx_pat, 'address': clean_val})
             if rows:
                 return pd.DataFrame(rows).drop_duplicates()
     except Exception:
@@ -103,13 +105,16 @@ def parse_to_dataframe(content):
 
     for item in items:
         if not isinstance(item, str):
-            if isinstance(item, dict): # 处理 YAML 中夹杂的字典
+            if isinstance(item, dict): 
                 continue
             item = str(item)
             
-        item = item.strip().strip("'\"")
+        # 剥离行内注释并清理引号
+        item = item.split('#')[0].strip().strip("'\"")
+        if not item:
+            continue
         if item.startswith('- '):
-            item = item[2:].strip().strip("'\"")
+            item = item[2:].strip().strip("'\"").split('#')[0].strip()
 
         if ',' not in item:
             if is_ip_address(item):
@@ -121,15 +126,14 @@ def parse_to_dataframe(content):
         else:
             parts = item.split(',', 1)
             pattern = parts[0].strip().upper()
-            address = parts[1].strip()
-            # 防止逗号后面带备注或策略
+            address = parts[1].strip().split('#')[0].strip()
             if ',' in address:
                 address = address.split(',', 1)[0].strip()
 
-        rows.append({'pattern': pattern, 'address': address})
+        if pattern and address:
+            rows.append({'pattern': pattern, 'address': address})
 
     df = pd.DataFrame(rows, columns=['pattern', 'address'])
-    # 清洗无效数据
     if not df.empty:
         df = df[~df['pattern'].str.contains('#', na=False)]
         df = df.drop_duplicates().reset_index(drop=True)
@@ -196,7 +200,7 @@ def export_singbox(df, output_path_base):
     print(f"[Export sing-box] Successfully generated: {json_path} and {srs_path}")
 
 def export_xray_domain(df, output_path):
-    """导出为 domain-list-community 格式的纯文本规则源（完美支持正则表达式）"""
+    """导出为 domain-list-community 格式的纯文本规则源（安全处理正则）"""
     lines = []
     for _, row in df.iterrows():
         pat, addr = row['pattern'].upper(), row['address']
@@ -207,11 +211,16 @@ def export_xray_domain(df, output_path):
         elif pat in ('DOMAIN-KEYWORD', 'HOST-KEYWORD'):
             lines.append(f"keyword:{addr}")
         elif pat in ('URL-REGEX', 'DOMAIN-REGEX'):
-            lines.append(f"regexp:{addr}")  # 原生支持 Xray 正则表达式
+            # 【安全检查】Xray 的 domain 规则只匹配主机名，不接受带协议头或路径的完整 URL 正则
+            if '://' in addr or ('/' in addr and not addr.startswith('\\')):
+                print(f"[Warning] Skipped incompatible URL-REGEX for Xray domain (contains scheme/path): {addr}")
+                continue
+            lines.append(f"regexp:{addr}")
             
     if lines:
+        unique_sorted_lines = sorted(list(set(lines)))
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write("\n".join(lines) + "\n")
+            f.write("\n".join(unique_sorted_lines) + "\n")
         print(f"[Export Xray Domain] Successfully generated: {output_path}")
 
 def export_xray_ip(df, output_path):
@@ -223,8 +232,9 @@ def export_xray_ip(df, output_path):
             ip_list.append(addr)
             
     if ip_list:
+        unique_sorted_ips = sorted(list(set(ip_list)))
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write("\n".join(set(ip_list)) + "\n")
+            f.write("\n".join(unique_sorted_ips) + "\n")
         print(f"[Export Xray IP] Successfully generated: {output_path}")
 
 # ----------------------------------------------------
@@ -261,12 +271,10 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    # 智能识别输入：如果是列表文件（如 ip_file_list 或者是 rules.txt），按行读取多个源
     sources = []
     if os.path.isfile(args.input):
         with open(args.input, 'r', encoding='utf-8') as f:
             lines = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
-        # 如果文件里每一行都是路径或链接，则批量处理；否则把该文件本身当作单规则源
         if all('/' in l or '.' in l or l.startswith('http') for l in lines) and len(lines) > 0:
             sources = lines
         else:
