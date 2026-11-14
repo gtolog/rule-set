@@ -1,9 +1,9 @@
-full:fbcdn-a.akamaihd.net
 domain:aboutfacebook.com
 domain:accessfacebookfromschool.com
 domain:acebooik.com
 domain:acebook.com
 domain:advancediddetection.com
+domain:analytics.facebook.com
 domain:askfacebook.net
 domain:askfacebook.org
 domain:atdmt2.com
@@ -110,6 +110,7 @@ domain:facebook30.com
 domain:facebook30.net
 domain:facebook30.org
 domain:facebook4business.com
+domain:facebookads.com
 domain:facebookadvertisingsecrets.com
 domain:facebookatschool.com
 domain:facebookawards.com
@@ -199,6 +200,7 @@ domain:facebooktv.net
 domain:facebooktv.org
 domain:facebookvacation.com
 domain:facebookw.com
+domain:facebookwork.com
 domain:facebookworld.com
 domain:facebool.com
 domain:facebool.info
@@ -368,7 +370,9 @@ domain:newsfeed.com
 domain:nextstop.com
 domain:online-deals.net
 domain:opencreate.org
+domain:pixel.facebook.com
 domain:reachtheworldonfacebook.com
+domain:redkix.com
 domain:shopfacebook.com
 domain:sportsfacebook.com
 domain:sportstream.com
@@ -381,6 +385,8 @@ domain:thefind.com
 domain:toplayerserver.com
 domain:viewpointsfromfacebook.com
 domain:whyfacebook.com
+domain:workplace.com
+domain:workplaceusecases.com
 domain:worldhack.com
 domain:www-facebook.com
 domain:wwwfacebok.com
@@ -388,10 +394,4 @@ domain:wwwfacebook.com
 domain:wwwmfacebook.com
 domain:zuckerberg.com
 domain:zuckerberg.net
-domain:facebookwork.com
-domain:redkix.com
-domain:workplace.com
-domain:workplaceusecases.com
-domain:analytics.facebook.com
-domain:facebookads.com
-domain:pixel.facebook.com
+full:fbcdn-a.akamaihd.net

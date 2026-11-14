@@ -1,8 +1,11 @@
 domain:mediawiki.org
+domain:toolforge.org
+domain:w.wiki
 domain:wikibooks.org
 domain:wikidata.org
-domain:wikimediafoundation.org
 domain:wikimedia.org
+domain:wikimediacloud.org
+domain:wikimediafoundation.org
 domain:wikinews.org
 domain:wikipedia.org
 domain:wikiquote.org
@@ -10,9 +13,6 @@ domain:wikisource.org
 domain:wikiversity.org
 domain:wikivoyage.org
 domain:wiktionary.org
-domain:wmfusercontent.org
-domain:w.wiki
-domain:toolforge.org
-domain:wikimediacloud.org
 domain:wmcloud.org
 domain:wmflabs.org
+domain:wmfusercontent.org
