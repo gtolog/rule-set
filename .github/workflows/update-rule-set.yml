@@ -92,7 +92,7 @@ jobs:
         $(go env GOPATH)/bin/domain-list-community --datapath=./xray/domain --outputname=xray.domain.dat --outputdir=./xray
 
         # 编译 v2fly/geoip
-        go install github.com/v2fly/geoip/v5@latest
+        go install github.com/v2fly/geoip@latest
         
         cat << EOF > geoip-config.json
         {
