@@ -85,6 +85,41 @@ jobs:
         find qx/filter/domain -name "*.list" > domain_file_list
         python tools/converter.py domain_file_list "xray/domain" --target xray-domain
 
+    - name: Compile for xray
+      run: |
+        # 编译 domain-list-community (已支持正则表达式)
+        go install github.com/v2fly/domain-list-community@latest
+        $(go env GOPATH)/bin/domain-list-community --datapath=./xray/domain --outputname=xray.domain.dat --outputdir=./xray
+
+        # 编译 v2fly/geoip
+        go install github.com/v2fly/geoip/v5@latest
+        
+        cat << EOF > geoip-config.json
+        {
+          "input": [
+            {
+              "type": "text",
+              "action": "add",
+              "args": {
+                "inputDir": "./xray/ip"
+              }
+            }
+          ],
+          "output": [
+            {
+              "type": "v2rayGeoIPDat",
+              "action": "output",
+              "args": {
+                "outputDir": "./xray",
+                "outputName": "xray.ip.dat"
+              }
+            }
+          ]
+        }
+        EOF
+        
+        $(go env GOPATH)/bin/geoip -c geoip-config.json
+
     - name: Commit and push changes
       run: |
         git config --global user.email "action@github.com"
@@ -94,8 +129,7 @@ jobs:
         git add qx/filter/ip/*.list
         git add sing-box/*.json
         git add sing-box/*.srs
-        git add xray/domain/
-        git add xray/ip/
+        git add xray/
 
         if git diff --staged --quiet; then
           echo "No changes to commit"
