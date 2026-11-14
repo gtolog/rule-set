@@ -83,22 +83,20 @@ jobs:
         python tools/converter.py "tools/ipcidr" "sing-box" --target singbox
         python tools/converter.py "tools/qxlist" "sing-box" --target singbox
 
-    # 4. 生成 Xray 纯文本规则源并编译 dat
-    - name: Build Xray Dat Files
+    - name: Run Xray Converter and Build Dat
       run: |
         mkdir -p xray/ip xray/domain
 
-        find qx/filter/ip -name "*.list" > ip_file_list
-        python tools/converter.py ip_file_list "xray/ip" --target xray-ip
+        # 直接读取你的配置清单文件进行批量转换
+        python tools/converter.py "tools/ipcidr" "xray/ip" --target xray-ip
+        python tools/converter.py "tools/qxlist" "xray/domain" --target xray-domain
+        python tools/converter.py "tools/sing-box-geosite" "xray/domain" --target xray-domain
 
-        find qx/filter/domain -name "*.list" > domain_file_list
-        python tools/converter.py domain_file_list "xray/domain" --target xray-domain
-
-        # 编译 domain-list-community
+        # --- 编译 domain-list-community ---
         go install github.com/v2fly/domain-list-community@latest
         $(go env GOPATH)/bin/domain-list-community --datapath=./xray/domain --outputname=xray.domain.dat --outputdir=./xray
 
-        # 编译 v2fly/geoip
+        # --- 编译 v2fly/geoip ---
         go install github.com/v2fly/geoip@latest
         
         cat << EOF > geoip-config.json
