@@ -174,12 +174,18 @@ jobs:
                   f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6_nets))) + "\n")
           '
 
-      # 【修改点】将 ipcidr 文件夹同步发布到 release 分支
+      # 1. 创建一个发布暂存目录，并将文件放入 cidr 子文件夹中
+      - name: Prepare release directory
+        run: |
+          mkdir -p release_stage/cidr
+          cp -r ipcidr/* release_stage/cidr/
+
+      # 2. 将包含 cidr 文件夹的目录推送到 release 分支
       - name: Deploy to release branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./ipcidr
+          publish_dir: ./release_stage
           publish_branch: release
           commit_message: "Auto-update IP CIDR lists: $(date --rfc-3339=sec)"
-          force_orphan: false # 设为 false 表示保留提交历史，如果希望每次都是干净的单次提交可以改为 true
+          force_orphan: false
