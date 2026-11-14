@@ -177,8 +177,8 @@ jobs:
       # 1. 创建一个发布暂存目录，并将文件放入 cidr 子文件夹中
       - name: Prepare release directory
         run: |
-          mkdir -p release_stage/cidr
-          cp -r ipcidr/* release_stage/cidr/
+          mkdir -p release_stage/ipcidr
+          cp -r ipcidr/* release_stage/ipcidr/
 
       # 2. 将包含 cidr 文件夹的目录推送到 release 分支
       - name: Deploy to release branch
