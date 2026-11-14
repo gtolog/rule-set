@@ -1,25 +1,26 @@
-import pandas as pd
-import re
-import concurrent.futures
 import os
+import re
 import json
-import requests
 import yaml
-import ipaddress
+import glob
 import argparse
+import ipaddress
+import requests
+import pandas as pd
 
-# 正向映射字典 (Quantumult X / 规则 -> sing-box)
-MAP_DICT = {
+# ----------------------------------------------------
+# 1. 映射字典定义
+# ----------------------------------------------------
+MAP_TO_SINGBOX = {
     'DOMAIN-SUFFIX': 'domain_suffix', 'HOST-SUFFIX': 'domain_suffix', 'host-suffix': 'domain_suffix', 
     'DOMAIN': 'domain', 'HOST': 'domain', 'host': 'domain',
     'DOMAIN-KEYWORD': 'domain_keyword', 'HOST-KEYWORD': 'domain_keyword', 'host-keyword': 'domain_keyword', 
     'IP-CIDR': 'ip_cidr', 'ip-cidr': 'ip_cidr', 'IP-CIDR6': 'ip_cidr', 'IP6-CIDR': 'ip_cidr',
     'SRC-IP-CIDR': 'source_ip_cidr', 'GEOIP': 'geoip', 'DST-PORT': 'port',
-    'SRC-PORT': 'source_port', "URL-REGEX": "domain_regex", "DOMAIN-REGEX": "domain_regex"
+    'SRC-PORT': 'source_port', 'URL-REGEX': 'domain_regex', 'DOMAIN-REGEX': 'domain_regex'
 }
 
-# 反向映射字典 (sing-box -> Quantumult X)
-REVERSE_MAP_DICT = {
+REVERSE_MAP = {
     'domain_suffix': 'DOMAIN-SUFFIX',
     'domain': 'DOMAIN',
     'domain_keyword': 'DOMAIN-KEYWORD',
@@ -31,286 +32,247 @@ REVERSE_MAP_DICT = {
     'source_port': 'SRC-PORT'
 }
 
-def load_text_or_yaml(path_or_url):
-    headers = {'User-Agent': 'Mozilla/5.0'}
+# ----------------------------------------------------
+# 2. 基础工具与加载函数
+# ----------------------------------------------------
+def load_content(path_or_url):
+    """加载远程 URL 或本地文件内容"""
     if path_or_url.startswith(('http://', 'https://')):
         try:
-            response = requests.get(path_or_url, headers=headers)
-            response.raise_for_status()
-            return response.text
+            res = requests.get(path_or_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=15)
+            res.raise_for_status()
+            return res.text
         except Exception as e:
-            print(f"Error fetching URL {path_or_url}: {e}")
+            print(f"[Error] Failed to fetch URL {path_or_url}: {e}")
+            return None
+    elif os.path.isfile(path_or_url):
+        try:
+            with open(path_or_url, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            print(f"[Error] Failed to read file {path_or_url}: {e}")
             return None
     else:
-        if os.path.isfile(path_or_url):
-            try:
-                with open(path_or_url, 'r', encoding='utf-8') as f:
-                    return f.read()
-            except Exception as e:
-                print(f"Error reading file {path_or_url}: {e}")
-                return None
-        else:
-            print(f"File not found or invalid path: {path_or_url}")
-            return None
-
-def is_ipv4_or_ipv6(address):
-    try:
-        ipaddress.ip_network(address, strict=False)
-        return 'ip_cidr'
-    except ValueError:
+        print(f"[Error] Invalid path or file not found: {path_or_url}")
         return None
 
-def detect_file_type(content):
-    """自动检测内容是 sing-box JSON 规则文件还是普通的 List 列表"""
+def is_ip_address(addr):
+    try:
+        ipaddress.ip_network(addr, strict=False)
+        return True
+    except ValueError:
+        return False
+
+# ----------------------------------------------------
+# 3. 核心解析引擎：统一转为标准化 DataFrame
+# ----------------------------------------------------
+def parse_to_dataframe(content):
+    """将任意规则文本/YAML/JSON 解析为统一的 DataFrame [pattern, address]"""
+    rows = []
+    
+    # 尝试解析为 JSON (如 sing-box 规则文件)
     try:
         data = json.loads(content)
-        if isinstance(data, dict) and ('rules' in data or 'version' in data):
-            return 'json', data
+        if isinstance(data, dict) and 'rules' in data:
+            for rule in data.get('rules', []):
+                for key, values in rule.items():
+                    qx_pat = REVERSE_MAP.get(key, key.upper())
+                    if isinstance(values, str):
+                        values = [values]
+                    for val in values:
+                        rows.append({'pattern': qx_pat, 'address': str(val).strip()})
+            if rows:
+                return pd.DataFrame(rows).drop_duplicates()
     except Exception:
         pass
-    return 'list', None
 
-def parse_and_convert_content_to_dataframe(content):
-    rows = []
+    # 尝试解析为 YAML (如 Meta/Clash payload)
+    items = None
     try:
         yaml_data = yaml.safe_load(content)
         if isinstance(yaml_data, dict):
             items = yaml_data.get('payload', [])
         elif isinstance(yaml_data, list):
             items = yaml_data
-        else:
-            items = None
     except Exception:
-        items = None
+        pass
 
-    if items is not None:
-        for item in items:
-            if not item or not isinstance(item, str):
+    # 如果不是 YAML，则按行解析纯文本 / .list 格式
+    if items is None:
+        items = [line.strip() for line in content.splitlines() if line.strip() and not line.strip().startswith('#')]
+
+    for item in items:
+        if not isinstance(item, str):
+            if isinstance(item, dict): # 处理 YAML 中夹杂的字典
                 continue
-            item = item.strip().strip("'\"")
-            if ',' not in item:
-                if is_ipv4_or_ipv6(item):
-                    pattern = 'IP-CIDR'
-                    address = item
-                else:
-                    if item.startswith('+') or item.startswith('.'):
-                        pattern = 'DOMAIN-SUFFIX'
-                        address = item.lstrip('+').lstrip('.')
-                    else:
-                        pattern = 'DOMAIN'
-                        address = item
-            else:
-                parts = item.split(',', 1)
-                pattern = parts[0].strip()
-                address = parts[1].strip()
-                if ',' in address:
-                    address = address.split(',', 1)[0].strip()
-            rows.append({'pattern': pattern, 'address': address, 'other': None})
-    else:
-        lines = content.splitlines()
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith('#'):
-                continue
-            if line.startswith('- '):
-                line = line[2:].strip().strip("'\"")
+            item = str(item)
             
-            if ',' not in line:
-                if is_ipv4_or_ipv6(line):
-                    pattern = 'IP-CIDR'
-                    address = line
-                else:
-                    if line.startswith('+') or line.startswith('.'):
-                        pattern = 'DOMAIN-SUFFIX'
-                        address = line.lstrip('+').lstrip('.')
-                    else:
-                        pattern = 'DOMAIN'
-                        address = line
-            else:
-                parts = line.split(',', 1)
-                pattern = parts[0].strip()
-                address = parts[1].strip()
-                if ',' in address:
-                    address = address.split(',', 1)[0].strip()
-            rows.append({'pattern': pattern, 'address': address, 'other': None})
+        item = item.strip().strip("'\"")
+        if item.startswith('- '):
+            item = item[2:].strip().strip("'\"")
 
-    return pd.DataFrame(rows, columns=['pattern', 'address', 'other'])
+        if ',' not in item:
+            if is_ip_address(item):
+                pattern, address = 'IP-CIDR', item
+            elif item.startswith('+') or item.startswith('.'):
+                pattern, address = 'DOMAIN-SUFFIX', item.lstrip('+').lstrip('.')
+            else:
+                pattern, address = 'DOMAIN', item
+        else:
+            parts = item.split(',', 1)
+            pattern = parts[0].strip().upper()
+            address = parts[1].strip()
+            # 防止逗号后面带备注或策略
+            if ',' in address:
+                address = address.split(',', 1)[0].strip()
+
+        rows.append({'pattern': pattern, 'address': address})
+
+    df = pd.DataFrame(rows, columns=['pattern', 'address'])
+    # 清洗无效数据
+    if not df.empty:
+        df = df[~df['pattern'].str.contains('#', na=False)]
+        df = df.drop_duplicates().reset_index(drop=True)
+    return df
 
 def sort_dict(obj):
+    """递归排序字典或列表，保证输出 JSON 的规范性"""
     if isinstance(obj, dict):
         return {k: sort_dict(obj[k]) for k in sorted(obj)}
-    elif isinstance(obj, list) and all(isinstance(elem, dict) for elem in obj):
+    elif isinstance(obj, list) and all(isinstance(e, dict) for e in obj):
         return sorted([sort_dict(x) for x in obj], key=lambda d: sorted(d.keys())[0])
     elif isinstance(obj, list):
         return sorted(sort_dict(x) for x in obj)
-    else:
-        return obj
+    return obj
 
-def convert_list_to_outputs(content, link, file_name_base, output_directory):
-    """List 转 QX List, sing-box JSON & 编译 SRS"""
-    try:
-        df = parse_and_convert_content_to_dataframe(content)
-        if df.empty:
-            print(f"Warning: No valid rules parsed from {link}")
-            return None
+# ----------------------------------------------------
+# 4. 多路格式导出器 (Exporters)
+# ----------------------------------------------------
+def export_quantumult_x(df, output_path):
+    """导出为 Quantumult X .list 格式"""
+    lines = []
+    for _, row in df.iterrows():
+        pat, addr = row['pattern'], row['address']
+        if pat in ('IP-CIDR', 'IP-CIDR6', 'IP6-CIDR'):
+            try:
+                net = ipaddress.ip_network(addr, strict=False)
+                pat = 'IP-CIDR6' if net.version == 6 else 'IP-CIDR'
+            except:
+                pass
+        lines.append(f"{pat},{addr}")
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines) + '\n')
+    print(f"[Export QX] Successfully generated: {output_path}")
 
-        df = df[~df['pattern'].str.contains('#', na=False)].reset_index(drop=True)
-        df = df[df['pattern'].isin(MAP_DICT.keys())].reset_index(drop=True)
-        df = df.drop_duplicates().reset_index(drop=True)
+def export_singbox(df, output_path_base):
+    """导出为 sing-box JSON 并编译为 .srs 二进制文件"""
+    df_sb = df.copy()
+    df_sb['pattern'] = df_sb['pattern'].replace(MAP_TO_SINGBOX)
+    
+    result_rules = {"version": 2, "rules": []}
+    domain_entries = []
+    
+    for pattern, addresses in df_sb.groupby('pattern')['address'].apply(list).to_dict().items():
+        clean_addrs = [a.strip() for a in addresses]
+        if pattern == 'domain_suffix':
+            result_rules["rules"].append({pattern: clean_addrs})
+        elif pattern == 'domain':
+            domain_entries.extend(clean_addrs)
+        else:
+            result_rules["rules"].append({pattern: clean_addrs})
 
-        # 1. 生成 Quantumult X 格式的 .list 文件
-        list_lines = []
-        for _, row in df.iterrows():
-            pat = row['pattern'].upper()
-            addr = row['address']
-            # 如果是 IP，智能区分 IPv4 和 IPv6 格式
-            if pat in ('IP-CIDR', 'IP-CIDR6', 'IP6-CIDR'):
-                try:
-                    net = ipaddress.ip_network(addr, strict=False)
-                    if net.version == 6:
-                        pat = 'IP-CIDR6'
-                    else:
-                        pat = 'IP-CIDR'
-                except:
-                    pass
-            list_lines.append(f"{pat},{addr}")
+    domain_entries = list(set(domain_entries))
+    if domain_entries:
+        result_rules["rules"].insert(0, {'domain': domain_entries})
 
-        list_file_path = os.path.join(output_directory, f"{file_name_base}.list")
-        with open(list_file_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(list_lines) + '\n')
+    json_path = f"{output_path_base}.json"
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json_str = json.dumps(sort_dict(result_rules), ensure_ascii=False, indent=2)
+        f.write(json_str.replace('\\\\', '\\'))
 
-        # 2. 转换 Pattern 为 sing-box 格式以生成 JSON
-        df['pattern'] = df['pattern'].replace(MAP_DICT)
+    srs_path = f"{output_path_base}.srs"
+    os.system(f"sing-box rule-set compile --output {srs_path} {json_path}")
+    print(f"[Export sing-box] Successfully generated: {json_path} and {srs_path}")
 
-        result_rules = {"version": 2, "rules": []}
-        domain_entries = []
-        for pattern, addresses in df.groupby('pattern')['address'].apply(list).to_dict().items():
-            if pattern == 'domain_suffix':
-                rule_entry = {pattern: [address.strip() for address in addresses]}
-                result_rules["rules"].append(rule_entry)
-            elif pattern == 'domain':
-                domain_entries.extend([address.strip() for address in addresses])
-            else:
-                rule_entry = {pattern: [address.strip() for address in addresses]}
-                result_rules["rules"].append(rule_entry)
+def export_xray_domain(df, output_path):
+    """导出为 domain-list-community 格式的纯文本规则源（完美支持正则表达式）"""
+    lines = []
+    for _, row in df.iterrows():
+        pat, addr = row['pattern'].upper(), row['address']
+        if pat in ('DOMAIN-SUFFIX', 'HOST-SUFFIX'):
+            lines.append(f"domain:{addr}")
+        elif pat in ('DOMAIN', 'HOST'):
+            lines.append(f"full:{addr}")
+        elif pat in ('DOMAIN-KEYWORD', 'HOST-KEYWORD'):
+            lines.append(f"keyword:{addr}")
+        elif pat in ('URL-REGEX', 'DOMAIN-REGEX'):
+            lines.append(f"regexp:{addr}")  # 原生支持 Xray 正则表达式
+            
+    if lines:
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write("\n".join(lines) + "\n")
+        print(f"[Export Xray Domain] Successfully generated: {output_path}")
 
-        domain_entries = list(set(domain_entries))
-        if domain_entries:
-            result_rules["rules"].insert(0, {'domain': domain_entries})
+def export_xray_ip(df, output_path):
+    """导出为 v2fly/geoip 格式的纯 IP 列表源"""
+    ip_list = []
+    for _, row in df.iterrows():
+        pat, addr = row['pattern'].upper(), row['address']
+        if pat in ('IP-CIDR', 'IP-CIDR6', 'IP6-CIDR', 'SRC-IP-CIDR'):
+            ip_list.append(addr)
+            
+    if ip_list:
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write("\n".join(set(ip_list)) + "\n")
+        print(f"[Export Xray IP] Successfully generated: {output_path}")
 
-        json_file_path = os.path.join(output_directory, f"{file_name_base}.json")
-        with open(json_file_path, 'w', encoding='utf-8') as output_file:
-            result_rules_str = json.dumps(sort_dict(result_rules), ensure_ascii=False, indent=2)
-            result_rules_str = result_rules_str.replace('\\\\', '\\')
-            output_file.write(result_rules_str)
-
-        # 3. 编译出 .srs 文件
-        srs_path = json_file_path.replace(".json", ".srs")
-        os.system(f"sing-box rule-set compile --output {srs_path} {json_file_path}")
-        print(f"Successfully generated (List -> List, JSON & SRS): {list_file_path}, {json_file_path} and {srs_path}")
-        return json_file_path
-    except Exception as e:
-        print(f'处理 List 链接出错，已跳过：{link}，原因：{str(e)}')
-        return None
-
-def convert_json_to_outputs(data, file_name_base, output_directory):
-    """JSON 转 QX List, 规范化 JSON & 编译 SRS"""
-    try:
-        rules = data.get('rules', [])
-        list_lines = []
-        for rule in rules:
-            for key, values in rule.items():
-                qx_pattern = REVERSE_MAP_DICT.get(key, key.upper())
-                if isinstance(values, list):
-                    for val in values:
-                        curr_pattern = qx_pattern
-                        if key == 'ip_cidr':
-                            try:
-                                net = ipaddress.ip_network(val, strict=False)
-                                if net.version == 6:
-                                    curr_pattern = 'IP-CIDR6'
-                                else:
-                                    curr_pattern = 'IP-CIDR'
-                            except:
-                                pass
-                        list_lines.append(f"{curr_pattern},{val}")
-                elif isinstance(values, str):
-                    list_lines.append(f"{qx_pattern},{values}")
-        
-        # 写入 QX List 文件
-        list_file_path = os.path.join(output_directory, f"{file_name_base}.list")
-        with open(list_file_path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(list_lines) + '\n')
-        
-        # 写入规范化的 JSON 文件
-        json_file_path = os.path.join(output_directory, f"{file_name_base}.json")
-        with open(json_file_path, 'w', encoding='utf-8') as f:
-            json.dump(sort_dict(data), f, ensure_ascii=False, indent=2)
-        
-        # 编译出 srs 文件
-        srs_path = os.path.join(output_directory, f"{file_name_base}.srs")
-        os.system(f"sing-box rule-set compile --output {srs_path} {json_file_path}")
-        print(f"Successfully generated (JSON -> List, JSON & SRS): {list_file_path}, {json_file_path} and {srs_path}")
-        return json_file_path
-    except Exception as e:
-        print(f'处理 JSON 转换出错: {str(e)}')
-        return None
-
-def process_file(link, output_directory):
-    content = load_text_or_yaml(link)
+# ----------------------------------------------------
+# 5. 主入口与任务分发
+# ----------------------------------------------------
+def process_target(source, output_dir, target_type):
+    content = load_content(source)
     if not content:
-        return None
-    
-    clean_basename = os.path.basename(link.split('?')[0])
-    file_name_base = os.path.splitext(clean_basename)[0]
-    if not file_name_base:
-        file_name_base = "rule"
+        return
 
-    os.makedirs(output_directory, exist_ok=True)
-    
-    file_type, json_data = detect_file_type(content)
-    if file_type == 'json':
-        return convert_json_to_outputs(json_data, file_name_base, output_directory)
-    else:
-        return convert_list_to_outputs(content, link, file_name_base, output_directory)
+    df = parse_to_dataframe(content)
+    if df.empty:
+        print(f"[Warning] No rules parsed from {source}")
+        return
+
+    base_name = os.path.splitext(os.path.basename(source.split('?')[0]))[0] or "rule"
+    os.makedirs(output_dir, exist_ok=True)
+
+    if target_type == 'qx':
+        export_quantumult_x(df, os.path.join(output_dir, f"{base_name}.list"))
+    elif target_type == 'singbox':
+        export_singbox(df, os.path.join(output_dir, base_name))
+    elif target_type == 'xray-domain':
+        export_xray_domain(df, os.path.join(output_dir, base_name))
+    elif target_type == 'xray-ip':
+        export_xray_ip(df, os.path.join(output_dir, base_name))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Convert between Quantumult X list files and sing-box JSON/SRS files.")
-    parser.add_argument('rules_file', nargs='?', default=None, 
-                        help='Path to the rules file (e.g., tools/rules.txt)')
-    parser.add_argument('output_dir', nargs='?', default='./output', 
-                        help='Directory to save generated files')
+    parser = argparse.ArgumentParser(description="Unified Rule Converter for QX, sing-box, and Xray.")
+    parser.add_argument('input', help='Input rules file, URL, or a file containing list of paths')
+    parser.add_argument('output_dir', help='Output directory')
+    parser.add_argument('--target', choices=['qx', 'singbox', 'xray-domain', 'xray-ip'], default='qx',
+                        help='Conversion target format')
     
     args = parser.parse_args()
 
-    # 1. 确定 rules 文件路径
-    rules_path = args.rules_file
-    if not rules_path:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        rules_path = os.path.join(script_dir, 'rules.txt')
-
-    # 2. 读取 rules 文件内容
-    links = []
-    if os.path.exists(rules_path):
-        with open(rules_path, 'r', encoding='utf-8') as f:
-            links = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+    # 智能识别输入：如果是列表文件（如 ip_file_list 或者是 rules.txt），按行读取多个源
+    sources = []
+    if os.path.isfile(args.input):
+        with open(args.input, 'r', encoding='utf-8') as f:
+            lines = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+        # 如果文件里每一行都是路径或链接，则批量处理；否则把该文件本身当作单规则源
+        if all('/' in l or '.' in l or l.startswith('http') for l in lines) and len(lines) > 0:
+            sources = lines
+        else:
+            sources = [args.input]
     else:
-        print(f"Error: Rules file not found at {rules_path}")
-        exit(1)
+        sources = [args.input]
 
-    if not links:
-        print(f"Error: No valid links or files found in {rules_path}")
-        exit(1)
-
-    # 3. 确定输出目录
-    output_dir = args.output_dir
-    os.makedirs(output_dir, exist_ok=True)
-
-    print(f"Using rules file: {rules_path}")
-    print(f"Output directory: {output_dir}")
-
-    result_file_names = []
-    for link in links:
-        result_file_name = process_file(link, output_directory=output_dir)
-        if result_file_name:
-            result_file_names.append(result_file_name)
+    for src in sources:
+        process_target(src, args.output_dir, args.target)
