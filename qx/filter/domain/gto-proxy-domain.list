@@ -171,3 +171,5 @@ HOST-SUFFIX,linux.do
 HOST-SUFFIX,gravatar.com
 # Append new domain via Shortcut
 HOST-SUFFIX,thetvdb.com
+# Append new domain via Shortcut
+HOST-SUFFIX,greatfire.org
