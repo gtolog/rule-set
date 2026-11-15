@@ -22,10 +22,10 @@ MAP_TO_SINGBOX = {
 }
 
 REVERSE_MAP = {
-    'domain_suffix': 'DOMAIN-SUFFIX',
-    'domain': 'DOMAIN',
-    'domain_keyword': 'DOMAIN-KEYWORD',
-    'domain_regex': 'DOMAIN-REGEX',
+    'domain_suffix': 'HOST-SUFFIX',
+    'domain': 'HOST',
+    'domain_keyword': 'HOST-KEYWORD',
+    'domain_regex': 'HOST-REGEX',
     'ip_cidr': 'IP-CIDR',
     'source_ip_cidr': 'SRC-IP-CIDR',
     'geoip': 'GEOIP',
