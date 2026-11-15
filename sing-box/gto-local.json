@@ -1,0 +1,20 @@
+{
+  "rules": [
+    {
+      "HOST-REGEX": [
+        "\.(10|168\.192|(1[6-9]|2[0-9]|3[0-1])\.172|0\.0\.127|254\.169)\.in-addr\.arpa$",
+        "\.([cd]\.f|0\.8\.e\.f)\.ip6\.arpa$",
+        "^[^.]+$"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "home.arpa",
+        "lan",
+        "local",
+        "service.arpa"
+      ]
+    }
+  ],
+  "version": 2
+}
