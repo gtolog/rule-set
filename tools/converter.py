@@ -17,7 +17,8 @@ MAP_TO_SINGBOX = {
     'DOMAIN-KEYWORD': 'domain_keyword', 'HOST-KEYWORD': 'domain_keyword', 'host-keyword': 'domain_keyword', 
     'IP-CIDR': 'ip_cidr', 'ip-cidr': 'ip_cidr', 'IP-CIDR6': 'ip_cidr', 'IP6-CIDR': 'ip_cidr',
     'SRC-IP-CIDR': 'source_ip_cidr', 'GEOIP': 'geoip', 'DST-PORT': 'port',
-    'SRC-PORT': 'source_port', 'URL-REGEX': 'domain_regex', 'DOMAIN-REGEX': 'domain_regex'
+    'SRC-PORT': 'source_port', 'URL-REGEX': 'domain_regex', 'DOMAIN-REGEX': 'domain_regex',
+    'HOST-REGEX': 'domain_regex', 'HOST-WILDCARD': 'domain_regex'
 }
 
 REVERSE_MAP = {
@@ -62,6 +63,17 @@ def is_ip_address(addr):
         return True
     except ValueError:
         return False
+
+def wildcard_to_regex(wildcard_str):
+    """将通配符（如 *.lan）安全转换为 sing-box 兼容的正则表达式"""
+    if not wildcard_str.startswith('*'):
+        return wildcard_str
+    # 移除开头的 * 并在前面加上转义点，或者针对通用通配符转换
+    # 例如 *.lan -> \.lan$ (或者 ^.*\.lan$)
+    cleaned = wildcard_str.lstrip('*').lstrip('.')
+    # 转义正则特殊字符
+    escaped = re.escape(cleaned)
+    return f"\\.{escaped}$"
 
 # ----------------------------------------------------
 # 3. 核心解析引擎：统一转为标准化 DataFrame
@@ -153,10 +165,21 @@ def sort_dict(obj):
 # 4. 多路格式导出器 (Exporters)
 # ----------------------------------------------------
 def export_quantumult_x(df, output_path):
-    """导出为 Quantumult X .list 格式"""
+    """导出为 Quantumult X .list 格式（自动跳过 QX 不支持的复杂正则）"""
     lines = []
     for _, row in df.iterrows():
         pat, addr = row['pattern'], row['address']
+        
+        # 1. 复杂正则降级处理：直接跳过 QX 无法识别的规则
+        if pat in ('DOMAIN-REGEX', 'URL-REGEX', 'HOST-REGEX'):
+            print(f"[Export QX Warning] Skipping complex regex not supported by QX: {pat}, {addr}")
+            continue
+            
+        # 2. 如果是通配符，QX 支持 HOST-WILDCARD
+        if pat == 'HOST-WILDCARD':
+            lines.append(f"HOST-WILDCARD,{addr}")
+            continue
+
         if pat in ('IP-CIDR', 'IP-CIDR6', 'IP6-CIDR'):
             try:
                 net = ipaddress.ip_network(addr, strict=False)
@@ -170,9 +193,22 @@ def export_quantumult_x(df, output_path):
     print(f"[Export QX] Successfully generated: {output_path}")
 
 def export_singbox(df, output_path_base):
-    """导出为 sing-box JSON 并编译为 .srs 二进制文件"""
+    """导出为 sing-box JSON 并编译为 .srs 二进制文件（支持通配符自动转正则）"""
     df_sb = df.copy()
-    df_sb['pattern'] = df_sb['pattern'].replace(MAP_TO_SINGBOX)
+    
+    # 处理通配符转正则
+    converted_addresses = []
+    for _, row in df_sb.iterrows():
+        pat, addr = row['pattern'], row['address']
+        if pat == 'HOST-WILDCARD':
+            # 将通配符转为 sing-box 认识的正则
+            regex_str = wildcard_to_regex(addr)
+            converted_addresses.append({'pattern': 'domain_regex', 'address': regex_str})
+        else:
+            mapped_pat = MAP_TO_SINGBOX.get(pat, pat.lower())
+            converted_addresses.append({'pattern': mapped_pat, 'address': addr})
+            
+    df_sb = pd.DataFrame(converted_addresses)
     
     result_rules = {"version": 2, "rules": []}
     domain_entries = []
@@ -192,15 +228,16 @@ def export_singbox(df, output_path_base):
 
     json_path = f"{output_path_base}.json"
     with open(json_path, 'w', encoding='utf-8') as f:
+        # 直接写入 json_str，保留正确的双反斜杠转义，修复之前的转义报错
         json_str = json.dumps(sort_dict(result_rules), ensure_ascii=False, indent=2)
-        f.write(json_str)  # 直接写入 json_str，保留正确的双反斜杠转义
+        f.write(json_str)
 
     srs_path = f"{output_path_base}.srs"
     os.system(f"sing-box rule-set compile --output {srs_path} {json_path}")
     print(f"[Export sing-box] Successfully generated: {json_path} and {srs_path}")
 
 def export_xray_domain(df, output_path):
-    """导出为 domain-list-community 格式的纯文本规则源（安全处理正则）"""
+    """导出为 domain-list-community 格式的纯文本规则源"""
     lines = []
     for _, row in df.iterrows():
         pat, addr = row['pattern'].upper(), row['address']
@@ -210,12 +247,14 @@ def export_xray_domain(df, output_path):
             lines.append(f"full:{addr}")
         elif pat in ('DOMAIN-KEYWORD', 'HOST-KEYWORD'):
             lines.append(f"keyword:{addr}")
-        elif pat in ('URL-REGEX', 'DOMAIN-REGEX'):
-            # 【安全检查】Xray 的 domain 规则只匹配主机名，不接受带协议头或路径的完整 URL 正则
+        elif pat in ('URL-REGEX', 'DOMAIN-REGEX', 'HOST-REGEX'):
             if '://' in addr or ('/' in addr and not addr.startswith('\\')):
-                print(f"[Warning] Skipped incompatible URL-REGEX for Xray domain (contains scheme/path): {addr}")
                 continue
             lines.append(f"regexp:{addr}")
+        elif pat == 'HOST-WILDCARD':
+            # 简单的通配符转 xray regexp
+            cleaned = addr.lstrip('*').lstrip('.')
+            lines.append(f"regexp:\\.{re.escape(cleaned)}$")
             
     if lines:
         unique_sorted_lines = sorted(list(set(lines)))
