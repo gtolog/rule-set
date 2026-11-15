@@ -193,7 +193,7 @@ def export_singbox(df, output_path_base):
     json_path = f"{output_path_base}.json"
     with open(json_path, 'w', encoding='utf-8') as f:
         json_str = json.dumps(sort_dict(result_rules), ensure_ascii=False, indent=2)
-        f.write(json_str.replace('\\\\', '\\'))
+        f.write(json_str)  # 直接写入 json_str，保留正确的双反斜杠转义
 
     srs_path = f"{output_path_base}.srs"
     os.system(f"sing-box rule-set compile --output {srs_path} {json_path}")
