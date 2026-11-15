@@ -94,7 +94,7 @@ jobs:
 
         # --- 编译 domain-list-community ---
         go install github.com/v2fly/domain-list-community@latest
-        $(go env GOPATH)/bin/domain-list-community --datapath=./xray/domain --outputname=xray.domain.dat --outputdir=./xray
+        $(go env GOPATH)/bin/domain-list-community --datapath=./xray/domain --outputname=geosite.dat --outputdir=./xray
 
         # --- 编译 v2fly/geoip ---
         go install github.com/v2fly/geoip@latest
@@ -116,7 +116,7 @@ jobs:
               "action": "output",
               "args": {
                 "outputDir": "./xray",
-                "outputName": "xray.ip.dat"
+                "outputName": "geoip.dat"
               }
             }
           ]
