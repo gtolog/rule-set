@@ -1,5 +1,5 @@
 # 匹配所有不含点号的本地单级主机名（例如 Nas、Camera、Router）
-HOST-REGEX, ^[^.]+$
+DOMAIN-REGEX, ^[^.]+$
 
 # 匹配常见的局域网域名后缀
 HOST-SUFFIX, lan
@@ -8,7 +8,7 @@ HOST-SUFFIX, home.arpa
 HOST-SUFFIX, service.arpa
 
 # IPv4 反向解析网段（内网设备 PTR 查询）
-HOST-REGEX, \.(10|168\.192|(1[6-9]|2[0-9]|3[0-1])\.172|0\.0\.127|254\.169)\.in-addr\.arpa$
+DOMAIN-REGEX, \.(10|168\.192|(1[6-9]|2[0-9]|3[0-1])\.172|0\.0\.127|254\.169)\.in-addr\.arpa$
 
 # IPv6 反向解析网段（ULA ULA本地地址及链路本地）
-HOST-REGEX, \.([cd]\.f|0\.8\.e\.f)\.ip6\.arpa$
+DOMAIN-REGEX, \.([cd]\.f|0\.8\.e\.f)\.ip6\.arpa$

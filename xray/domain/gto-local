@@ -2,3 +2,6 @@ domain:home.arpa
 domain:lan
 domain:local
 domain:service.arpa
+regexp:\.(10|168\.192|(1[6-9]|2[0-9]|3[0-1])\.172|0\.0\.127|254\.169)\.in-addr\.arpa$
+regexp:\.([cd]\.f|0\.8\.e\.f)\.ip6\.arpa$
+regexp:^[^.]+$
