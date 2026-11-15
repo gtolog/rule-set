@@ -22,4 +22,3 @@ DOMAIN-SUFFIX,host.livekit.cloud
 DOMAIN-SUFFIX,chatgpt.livekit.cloud
 DOMAIN-SUFFIX,turn.livekit.cloud
 DOMAIN-SUFFIX,openai.com.cdn.cloudflare.net
-DOMAIN-REGEX,^chatgpt-async-webps-prod-\S+-\d+\.webpubsub\.azure\.com$
