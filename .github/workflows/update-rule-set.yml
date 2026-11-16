@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'qx/filter/domain/gto-proxy-domain.list'
-      - 'qx/filter/ip/gto-home-ip.list'
+      - 'qx/filter/domain/gto-proxy.list'
+      - 'qx/filter/ip/gto-home.list'
   workflow_run:
     workflows:
       - "update-ipcidr"
