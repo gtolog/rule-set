@@ -128,6 +128,23 @@ def parse_to_dataframe(content):
         if item.startswith('- '):
             item = item[2:].strip().strip("'\"").split('#')[0].strip()
 
+        # === 【新增】处理 Xray 专用的冒号语法 (如 domain:, full:, keyword:, regexp:) ===
+        if ':' in item and not item.startswith(('http://', 'https://', 'IPv4:', 'IPv6:')):
+            parts = item.split(':', 1)
+            prefix = parts[0].strip().lower()
+            addr = parts[1].strip()
+            
+            xray_prefix_map = {
+                'domain': 'DOMAIN-SUFFIX',
+                'full': 'DOMAIN',
+                'keyword': 'DOMAIN-KEYWORD',
+                'regexp': 'DOMAIN-REGEX'
+            }
+            if prefix in xray_prefix_map:
+                rows.append({'pattern': xray_prefix_map[prefix], 'address': addr})
+                continue
+        # =========================================================================
+
         if ',' not in item:
             if is_ip_address(item):
                 pattern, address = 'IP-CIDR', item
