@@ -157,8 +157,9 @@ jobs:
     - name: Deploy to release branch
       uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GH_PAT }}
         publish_dir: ./release_stage
         publish_branch: release
         commit_message: "Auto-update rules and dat files: $(date --rfc-3339=sec)"
         force_orphan: false
+        disable_nojekyll: true
