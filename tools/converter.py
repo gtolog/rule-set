@@ -151,7 +151,7 @@ def parse_to_dataframe(content):
             elif item.startswith('+') or item.startswith('.'):
                 pattern, address = 'DOMAIN-SUFFIX', item.lstrip('+').lstrip('.')
             else:
-                pattern, address = 'DOMAIN', item
+                pattern, address = 'DOMAIN-SUFFIX', item
         else:
             parts = item.split(',', 1)
             pattern = parts[0].strip().upper()
