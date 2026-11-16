@@ -179,3 +179,6 @@ HOST-SUFFIX,gfwatch.org
 HOST-SUFFIX,gfweb.ca
 # Append new domain via Shortcut
 HOST-SUFFIX,greatfirewallguide.com
+
+# Append new domain via Shortcut
+HOST-SUFFIX,v2fly.org
