@@ -174,13 +174,18 @@ jobs:
                   f.write("\n".join(str(n) for n in sorted(ipaddress.collapse_addresses(v6_nets))) + "\n")
           '
 
-      # 1. 创建一个发布暂存目录，并将文件放入 cidr 子文件夹中
+      # 1. 先把现有的 release 分支克隆到 release_stage，防止清空 qx、sing-box、xray 等其他目录
       - name: Prepare release directory
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git clone --branch release --single-branch https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git release_stage || echo "Release branch does not exist yet, starting fresh."
+          
           mkdir -p release_stage/ipcidr
           cp -r ipcidr/* release_stage/ipcidr/
 
-      # 2. 将包含 cidr 文件夹的目录推送到 release 分支
+      # 2. 增量更新推送（仅更新 ipcidr 目录，其余目录完好保留）
       - name: Deploy to release branch
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -190,3 +195,4 @@ jobs:
           commit_message: "Auto-update IP CIDR lists: $(date --rfc-3339=sec)"
           force_orphan: false
           disable_nojekyll: true
+
