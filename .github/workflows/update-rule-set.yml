@@ -162,25 +162,18 @@ jobs:
 
     - name: Prepare Release Artifacts
       run: |
-        # 1. 配置 Git 身份并安全拉取远程 release 分支到临时目录合并
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
-        # 强制把远程 release 分支拉到本地的一个名为 temp_release 的目录中
-        git fetch origin release:temp_release || true
+        # 1. 直接尝试将远程 release 分支克隆到 release_stage 目录中
+        # 这样能完美保留 release 分支上已有的所有内容（如 ipcidr 等）
+        git clone --branch release --single-branch https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git release_stage || echo "Release branch does not exist yet or clone failed, starting fresh."
         
-        if git show-ref --verify --quiet refs/heads/temp_release; then
-          echo "Found existing release branch, copying old contents..."
-          # 将 release 分支已有的所有文件复制到发布暂存区
-          git worktree add ./wt_release temp_release
-          cp -r wt_release/* release_stage/ 2>/dev/null || true
-          git worktree remove ./wt_release --force || true
-        else
-          echo "Release branch does not exist yet, starting fresh."
-        fi
+        # 如果 release 分支尚不存在，确保 release_stage 目录存在
+        mkdir -p release_stage
         
         # 2. 将本次最新生成的 qx、sing-box、xray 目录覆盖/合并到发布暂存区
-        # （此时 xray/ 目录下会同时包含 geosite.dat、geoip.dat 和 Xray-linux-arm64-v8a.tar.gz）
+        # （原有的 ipcidr 目录会安全地保留在 release_stage/ipcidr 中，不会被删除）
         for dir in qx sing-box xray; do
           if [ -d "$dir" ]; then
             rm -rf "release_stage/$dir"
