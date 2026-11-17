@@ -91,6 +91,7 @@ jobs:
 
         # 直接读取你的配置清单文件进行批量转换
         python tools/converter.py "tools/ipcidr" "xray/ip" --target xray-ip
+        python tools/converter.py "tools/qxlist" "xray/ip" --target xray-ip
         python tools/converter.py "tools/qxlist" "xray/domain" --target xray-domain
         python tools/converter.py "tools/sing-box-geosite" "xray/domain" --target xray-domain
 
