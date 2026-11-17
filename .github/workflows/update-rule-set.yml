@@ -85,7 +85,7 @@ jobs:
         python tools/converter.py "tools/ipcidr" "sing-box/ip" --target singbox
         python tools/converter.py "tools/qx-filter-ip" "sing-box/ip" --target singbox
         python tools/converter.py "tools/qx-filter-domain" "sing-box/domain" --target singbox
-        python tools/converter.py "tools/xray-geosite" "sing-box" --target singbox
+        python tools/converter.py "tools/xray-geosite" "sing-box/domain" --target singbox
 
     - name: Run Xray Converter and Build Dat
       run: |
