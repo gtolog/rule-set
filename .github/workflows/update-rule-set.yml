@@ -129,11 +129,39 @@ jobs:
         EOF
         
         $(go env GOPATH)/bin/geoip -c geoip-config.json
+
+    - name: Download and Repackage Xray ARM64-v8a into xray/
+      run: |
+        mkdir -p xray_extracted
         
+        echo "Fetching latest Xray-core release URL for arm64-v8a..."
+        DOWNLOAD_URL=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest \
+            | grep "browser_download_url" \
+            | grep -E 'Xray-linux-arm64-v8a\.zip"' \
+            | cut -d '"' -f 4 \
+            | head -n 1)
+            
+        if [ -z "$DOWNLOAD_URL" ]; then
+            echo "Error: Failed to get Xray download URL."
+            exit 1
+        fi
+        
+        echo "Downloading from: $DOWNLOAD_URL"
+        wget -O xray.zip "$DOWNLOAD_URL"
+        
+        echo "Extracting zip..."
+        unzip -q xray.zip -d xray_extracted
+        
+        echo "Repackaging to .tar.gz inside xray/ directory..."
+        # 直接输出到 ./xray/Xray-linux-arm64-v8a.tar.gz
+        tar -czf xray/Xray-linux-arm64-v8a.tar.gz -C xray_extracted .
+        
+        # 清理临时文件（保留转换出来的 geosite.dat、geoip.dat 和刚打好的 tar.gz）
+        rm -rf xray.zip xray_extracted
+        echo "Xray binary successfully placed in xray/ !"
+
     - name: Prepare Release Artifacts
       run: |
-        mkdir -p release_stage
-        
         # 1. 配置 Git 身份并安全拉取远程 release 分支到临时目录合并
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -143,7 +171,7 @@ jobs:
         
         if git show-ref --verify --quiet refs/heads/temp_release; then
           echo "Found existing release branch, copying old contents..."
-          # 将 release 分支已有的所有文件（包含 ipcidr）复制到发布暂存区
+          # 将 release 分支已有的所有文件复制到发布暂存区
           git worktree add ./wt_release temp_release
           cp -r wt_release/* release_stage/ 2>/dev/null || true
           git worktree remove ./wt_release --force || true
@@ -152,6 +180,7 @@ jobs:
         fi
         
         # 2. 将本次最新生成的 qx、sing-box、xray 目录覆盖/合并到发布暂存区
+        # （此时 xray/ 目录下会同时包含 geosite.dat、geoip.dat 和 Xray-linux-arm64-v8a.tar.gz）
         for dir in qx sing-box xray; do
           if [ -d "$dir" ]; then
             rm -rf "release_stage/$dir"
@@ -165,6 +194,6 @@ jobs:
         github_token: ${{ secrets.GH_PAT }}
         publish_dir: ./release_stage
         publish_branch: release
-        commit_message: "Auto-update rules and dat files: $(date --rfc-3339=sec)"
+        commit_message: "Auto-update rules and xray binary package: $(date --rfc-3339=sec)"
         force_orphan: false
         disable_nojekyll: true
