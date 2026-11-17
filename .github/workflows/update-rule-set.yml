@@ -81,8 +81,10 @@ jobs:
         python tools/converter.py "tools/ipcidr" "qx/filter/ip" --target qx
         python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain" --target qx
         python tools/converter.py "tools/xray-geosite" "qx/filter/domain" --target qx
-        python tools/converter.py "tools/ipcidr" "sing-box" --target singbox
-        python tools/converter.py "tools/qxlist" "sing-box" --target singbox
+        
+        python tools/converter.py "tools/ipcidr" "sing-box/ip" --target singbox
+        python tools/converter.py "tools/qx-filter-ip" "sing-box/ip" --target singbox
+        python tools/converter.py "tools/qx-filter-domain" "sing-box/domain" --target singbox
         python tools/converter.py "tools/xray-geosite" "sing-box" --target singbox
 
     - name: Run Xray Converter and Build Dat
@@ -91,8 +93,8 @@ jobs:
 
         # 直接读取你的配置清单文件进行批量转换
         python tools/converter.py "tools/ipcidr" "xray/ip" --target xray-ip
-        python tools/converter.py "tools/qxlist" "xray/ip" --target xray-ip
-        python tools/converter.py "tools/qxlist" "xray/domain" --target xray-domain
+        python tools/converter.py "tools/qxfilter" "xray/ip" --target xray-ip
+        python tools/converter.py "tools/qxfilter" "xray/domain" --target xray-domain
         python tools/converter.py "tools/sing-box-geosite" "xray/domain" --target xray-domain
 
         # --- 编译 domain-list-community ---
