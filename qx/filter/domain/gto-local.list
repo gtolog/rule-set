@@ -29,6 +29,7 @@ HOST-WILDCARD, *.30.172.in-addr.arpa
 HOST-WILDCARD, *.31.172.in-addr.arpa
 
 # IPv6 反向解析网段 (ULA fc00::/7 与 Link-Local fe80::/16)
-HOST-WILDCARD, *.c.f.ip6.arpa
-HOST-WILDCARD, *.d.f.ip6.arpa
-HOST-WILDCARD, *.0.8.e.f.ip6.arpa
+# HOST-WILDCARD, *.c.f.ip6.arpa
+# HOST-WILDCARD, *.d.f.ip6.arpa
+# HOST-WILDCARD, *.0.8.e.f.ip6.arpa
+HOST-WILDCARD, *.ip6.arpa
