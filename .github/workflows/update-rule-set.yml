@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'qx/filter/domain/gto-proxy.list'
+      - 'qx/filter/domain/gto-local.list'
       - 'qx/filter/ip/gto-home.list'
   workflow_run:
     workflows:
