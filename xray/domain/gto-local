@@ -2,8 +2,8 @@ domain:home.arpa
 domain:lan
 domain:local
 domain:service.arpa
-regexp:\.0\.0\.127\.in\-addr\.arpa$
 regexp:\.10\.in\-addr\.arpa$
+regexp:\.127\.in\-addr\.arpa$
 regexp:\.168\.192\.in\-addr\.arpa$
 regexp:\.16\.172\.in\-addr\.arpa$
 regexp:\.17\.172\.in\-addr\.arpa$

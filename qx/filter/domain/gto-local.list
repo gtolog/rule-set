@@ -1,16 +1,18 @@
-# 局域网后缀（注意 QX 的 HOST-SUFFIX 前面不加点）
+# 各类路由器固件和内网习惯常用的本地域名后缀
 HOST-SUFFIX, lan
-HOST-SUFFIX, local
+
+# RFC 8375 专门为家庭网络（homenets）预留的特殊用途域名（Special-Use Domain），用于本地主机解析且不应在公网全局解析
 HOST-SUFFIX, home.arpa
+
+# RFC 9665 用于基于 DNS 的服务发现（DNS-SD）服务注册协议（SRP）及单播 DNS-SD 相关场景（如 default.service.arpa）
 HOST-SUFFIX, service.arpa
 
-# IPv4 反向解析网段
+# 在 RFC 6762 中，.local 保留给 mDNS（多播 DNS）
+HOST-SUFFIX, local
+
+# RFC 1918（IPv4 私有地址段） 10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12 (172.16 - 172.31，不能写成 *.1?.172.*，否则会误伤 172.10-172.15 公网段)
 HOST-WILDCARD, *.10.in-addr.arpa
 HOST-WILDCARD, *.168.192.in-addr.arpa
-HOST-WILDCARD, *.0.0.127.in-addr.arpa
-HOST-WILDCARD, *.254.169.in-addr.arpa
-
-# 172.16.0.0/12 (172.16 - 172.31，不能写成 *.1?.172.*，否则会误伤 172.10-172.15 公网段)
 HOST-WILDCARD, *.16.172.in-addr.arpa
 HOST-WILDCARD, *.17.172.in-addr.arpa
 HOST-WILDCARD, *.18.172.in-addr.arpa
@@ -28,8 +30,21 @@ HOST-WILDCARD, *.29.172.in-addr.arpa
 HOST-WILDCARD, *.30.172.in-addr.arpa
 HOST-WILDCARD, *.31.172.in-addr.arpa
 
-# IPv6 反向解析网段 (ULA fc00::/7 与 Link-Local fe80::/16)
+# RFC 1122 IPv4环回地址段
+HOST-WILDCARD, *.127.in-addr.arpa
+
+# IPv4 链路本地：169.254.0.0/16（RFC 3927）
+HOST-WILDCARD, *.254.169.in-addr.arpa
+
+# RFC 4193（IPv6 唯一本地地址 ULA：fc00::/7）
 # HOST-WILDCARD, *.c.f.ip6.arpa
 # HOST-WILDCARD, *.d.f.ip6.arpa
-# HOST-WILDCARD, *.0.8.e.f.ip6.arpa
+
+# RFC 4291 规定的 IPv6 链路本地地址
+# HOST-WILDCARD, *.8.e.f.ip6.arpa
+# HOST-WILDCARD, *.9.e.f.ip6.arpa
+# HOST-WILDCARD, *.a.e.f.ip6.arpa
+# HOST-WILDCARD, *.b.e.f.ip6.arpa
+
+# 为防止IPv6地址泄露，所有.ip6.arpa都统一划分到local，不仅是RFC 4193和RFC 4291
 HOST-WILDCARD, *.ip6.arpa
