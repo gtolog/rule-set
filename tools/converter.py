@@ -33,6 +33,8 @@ REVERSE_MAP = {
     'source_port': 'SRC-PORT'
 }
 
+IP_PATTERNS = {'IP-CIDR', 'IP-CIDR6', 'IP6-CIDR', 'SRC-IP-CIDR'}
+
 DOMAIN_RE = re.compile(
     r"^(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$"
 )
@@ -138,14 +140,12 @@ def parse_gfwlist_rows(text: str):
         if not line or line.startswith(("!", "[AutoProxy", "@@")):
             continue
 
-        # 正则规则
         if line.startswith("/") and line.endswith("/") and len(line) > 2:
             pattern_body = line[1:-1]
             if pattern_body:
                 rows.append({'pattern': 'DOMAIN-REGEX', 'address': pattern_body})
             continue
 
-        # 域名或 URL 规则（如 ||example.com/path、|https://example.com、.example.com）
         if line.startswith(("||", "|", ".")):
             host = extract_domain_from_rule(line)
             if is_ip_address(host):
@@ -154,7 +154,6 @@ def parse_gfwlist_rows(text: str):
                 rows.append({'pattern': 'DOMAIN-SUFFIX', 'address': host})
             continue
 
-        # 普通行：先尝试提取域名，再退化为简单关键词
         host = extract_domain_from_rule(line)
         if is_ip_address(host):
             rows.append({'pattern': 'IP-CIDR', 'address': host})
@@ -175,6 +174,22 @@ def wildcard_to_regex(wildcard_str: str) -> str:
     cleaned = wildcard_str.lstrip('*').lstrip('.')
     escaped = re.escape(cleaned)
     return f"\\.{escaped}$"
+
+
+def filter_df_by_mode(df: pd.DataFrame, mode: str | None) -> pd.DataFrame:
+    """按 'domain' 或 'ip' 过滤 DataFrame"""
+    if df.empty or not mode:
+        return df
+
+    upper_pats = df['pattern'].astype(str).str.upper()
+    if mode == 'ip':
+        filtered = df[upper_pats.isin(IP_PATTERNS)]
+    elif mode == 'domain':
+        filtered = df[~upper_pats.isin(IP_PATTERNS)]
+    else:
+        return df
+
+    return filtered.drop_duplicates().reset_index(drop=True)
 
 
 # ----------------------------------------------------
@@ -220,7 +235,6 @@ def parse_to_dataframe(content: str) -> pd.DataFrame:
     except Exception:
         pass
 
-    # 如果不是 YAML，则按行解析纯文本 / .list 格式
     if items is None:
         items = [line.strip() for line in content.splitlines() if line.strip() and not line.strip().startswith('#')]
 
@@ -313,8 +327,8 @@ def export_quantumult_x(df: pd.DataFrame, output_path: str):
         lines.append(f"{pat},{addr}")
 
     with open(output_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines) + '\n')
-    print(f"[Export QX] Successfully generated: {output_path}")
+        f.write('\n'.join(lines) + ('\n' if lines else ''))
+    print(f"[Export QX] Successfully generated: {output_path} ({len(lines)} rules)")
 
 
 def export_singbox(df: pd.DataFrame, output_path_base: str):
@@ -391,7 +405,7 @@ def export_xray_ip(df: pd.DataFrame, output_path: str):
     ip_list = []
     for _, row in df.iterrows():
         pat, addr = row['pattern'].upper(), row['address']
-        if pat in ('IP-CIDR', 'IP-CIDR6', 'IP6-CIDR', 'SRC-IP-CIDR'):
+        if pat in IP_PATTERNS:
             ip_list.append(addr)
 
     if ip_list:
@@ -424,15 +438,20 @@ def load_and_parse(source: str) -> pd.DataFrame:
 
 
 def export_by_target(df: pd.DataFrame, output_dir: str, target_type: str, base_name: str):
+    if target_type in ('qx-domain', 'singbox-domain'):
+        df = filter_df_by_mode(df, 'domain')
+    elif target_type in ('qx-ip', 'singbox-ip'):
+        df = filter_df_by_mode(df, 'ip')
+
     if df.empty:
-        print(f"[Warning] No rules to export for {base_name}")
+        print(f"[Warning] No matching rules to export for {base_name} (target={target_type})")
         return
 
     os.makedirs(output_dir, exist_ok=True)
 
-    if target_type == 'qx':
+    if target_type in ('qx', 'qx-domain', 'qx-ip'):
         export_quantumult_x(df, os.path.join(output_dir, f"{base_name}.list"))
-    elif target_type == 'singbox':
+    elif target_type in ('singbox', 'singbox-domain', 'singbox-ip'):
         export_singbox(df, os.path.join(output_dir, base_name))
     elif target_type == 'xray-domain':
         export_xray_domain(df, os.path.join(output_dir, base_name))
@@ -444,10 +463,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Unified Rule Converter for QX, sing-box, and Xray.")
     parser.add_argument('input', help='Input rules file, URL, or a file containing list of paths')
     parser.add_argument('output_dir', help='Output directory')
-    parser.add_argument('--target', choices=['qx', 'singbox', 'xray-domain', 'xray-ip'], default='qx',
-                        help='Conversion target format')
-    parser.add_argument('--name', default=None,
-                        help='Custom output base filename without extension (e.g., gfwlist)')
+    parser.add_argument(
+        '--target',
+        choices=['qx', 'qx-domain', 'qx-ip', 'singbox', 'singbox-domain', 'singbox-ip', 'xray-domain', 'xray-ip'],
+        default='qx',
+        help='Conversion target format'
+    )
+    parser.add_argument(
+        '--name',
+        default=None,
+        help='Custom output base filename without extension (e.g., gfwlist)'
+    )
 
     args = parser.parse_args()
 
