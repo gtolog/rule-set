@@ -50,7 +50,7 @@ def normalize_github_url(url: str) -> str:
     return url
 
 
-def load_content(path_or_url):
+def load_content(path_or_url: str):
     """加载远程 URL 或本地文件内容"""
     if path_or_url.startswith(('http://', 'https://')):
         target_url = normalize_github_url(path_or_url)
@@ -78,7 +78,6 @@ def decode_if_base64(text: str) -> str:
     stripped = text.strip()
     if not stripped:
         return text
-    # 常见明文特征直接返回
     if "[AutoProxy" in stripped or "||" in stripped or "\n!" in stripped or "\r\n!" in stripped:
         return text
 
@@ -103,6 +102,14 @@ def extract_domain_from_rule(raw: str) -> str:
         s = s.split(":", 1)[0]
     s = s.lstrip("*.").strip(".").lower()
     return s
+
+
+def is_ip_address(addr: str) -> bool:
+    try:
+        ipaddress.ip_network(addr, strict=False)
+        return True
+    except ValueError:
+        return False
 
 
 def is_gfwlist_format(text: str) -> bool:
@@ -161,15 +168,7 @@ def parse_gfwlist_rows(text: str):
     return rows
 
 
-def is_ip_address(addr):
-    try:
-        ipaddress.ip_network(addr, strict=False)
-        return True
-    except ValueError:
-        return False
-
-
-def wildcard_to_regex(wildcard_str):
+def wildcard_to_regex(wildcard_str: str) -> str:
     """将通配符（如 *.lan）安全转换为 sing-box 兼容的正则表达式"""
     if not wildcard_str.startswith('*'):
         return wildcard_str
@@ -181,9 +180,8 @@ def wildcard_to_regex(wildcard_str):
 # ----------------------------------------------------
 # 3. 核心解析引擎：统一转为标准化 DataFrame
 # ----------------------------------------------------
-def parse_to_dataframe(content):
+def parse_to_dataframe(content: str) -> pd.DataFrame:
     """将任意规则文本/YAML/JSON/GFWList 解析为统一的 DataFrame [pattern, address]"""
-    # 优先识别 GFWList / AutoProxy（含 Base64）
     if is_gfwlist_format(content):
         rows = parse_gfwlist_rows(content)
         df = pd.DataFrame(rows, columns=['pattern', 'address'])
@@ -207,7 +205,7 @@ def parse_to_dataframe(content):
                         if clean_val:
                             rows.append({'pattern': qx_pat, 'address': clean_val})
             if rows:
-                return pd.DataFrame(rows).drop_duplicates()
+                return pd.DataFrame(rows).drop_duplicates().reset_index(drop=True)
     except Exception:
         pass
 
@@ -292,7 +290,7 @@ def sort_dict(obj):
 # ----------------------------------------------------
 # 4. 多路格式导出器 (Exporters)
 # ----------------------------------------------------
-def export_quantumult_x(df, output_path):
+def export_quantumult_x(df: pd.DataFrame, output_path: str):
     """导出为 Quantumult X .list 格式（自动跳过 QX 不支持的复杂正则）"""
     lines = []
     for _, row in df.iterrows():
@@ -319,7 +317,7 @@ def export_quantumult_x(df, output_path):
     print(f"[Export QX] Successfully generated: {output_path}")
 
 
-def export_singbox(df, output_path_base):
+def export_singbox(df: pd.DataFrame, output_path_base: str):
     """导出为 sing-box JSON 并编译为 .srs 二进制文件（支持通配符自动转正则）"""
     df_sb = df.copy()
 
@@ -362,7 +360,7 @@ def export_singbox(df, output_path_base):
     print(f"[Export sing-box] Successfully generated: {json_path} and {srs_path}")
 
 
-def export_xray_domain(df, output_path):
+def export_xray_domain(df: pd.DataFrame, output_path: str):
     """导出为 domain-list-community 格式的纯文本规则源"""
     lines = []
     for _, row in df.iterrows():
@@ -388,7 +386,7 @@ def export_xray_domain(df, output_path):
         print(f"[Export Xray Domain] Successfully generated: {output_path}")
 
 
-def export_xray_ip(df, output_path):
+def export_xray_ip(df: pd.DataFrame, output_path: str):
     """导出为 v2fly/geoip 格式的纯 IP 列表源"""
     ip_list = []
     for _, row in df.iterrows():
@@ -406,17 +404,30 @@ def export_xray_ip(df, output_path):
 # ----------------------------------------------------
 # 5. 主入口与任务分发
 # ----------------------------------------------------
-def process_target(source, output_dir, target_type):
+def resolve_base_name(source: str, output_name: str | None) -> str:
+    default_name = os.path.splitext(os.path.basename(source.split('?')[0]))[0] or "rule"
+    if output_name:
+        clean_name = os.path.splitext(os.path.basename(output_name.strip()))[0]
+        return clean_name or default_name
+    return default_name
+
+
+def load_and_parse(source: str) -> pd.DataFrame:
     content = load_content(source)
     if not content:
-        return
-
+        return pd.DataFrame(columns=['pattern', 'address'])
     df = parse_to_dataframe(content)
-    if df.empty:
+    if df is None or df.empty:
         print(f"[Warning] No rules parsed from {source}")
+        return pd.DataFrame(columns=['pattern', 'address'])
+    return df
+
+
+def export_by_target(df: pd.DataFrame, output_dir: str, target_type: str, base_name: str):
+    if df.empty:
+        print(f"[Warning] No rules to export for {base_name}")
         return
 
-    base_name = os.path.splitext(os.path.basename(source.split('?')[0]))[0] or "rule"
     os.makedirs(output_dir, exist_ok=True)
 
     if target_type == 'qx':
@@ -435,6 +446,8 @@ if __name__ == "__main__":
     parser.add_argument('output_dir', help='Output directory')
     parser.add_argument('--target', choices=['qx', 'singbox', 'xray-domain', 'xray-ip'], default='qx',
                         help='Conversion target format')
+    parser.add_argument('--name', default=None,
+                        help='Custom output base filename without extension (e.g., gfwlist)')
 
     args = parser.parse_args()
 
@@ -449,5 +462,18 @@ if __name__ == "__main__":
     else:
         sources = [args.input]
 
-    for src in sources:
-        process_target(src, args.output_dir, args.target)
+    if len(sources) > 1 and args.name:
+        dfs = [load_and_parse(src) for src in sources]
+        non_empty_dfs = [d for d in dfs if not d.empty]
+        merged_df = (
+            pd.concat(non_empty_dfs, ignore_index=True).drop_duplicates().reset_index(drop=True)
+            if non_empty_dfs
+            else pd.DataFrame(columns=['pattern', 'address'])
+        )
+        base_name = resolve_base_name(sources[0], args.name)
+        export_by_target(merged_df, args.output_dir, args.target, base_name)
+    else:
+        for src in sources:
+            df = load_and_parse(src)
+            base_name = resolve_base_name(src, args.name)
+            export_by_target(df, args.output_dir, args.target, base_name)
