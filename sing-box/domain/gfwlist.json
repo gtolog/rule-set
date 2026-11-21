@@ -1,11 +1,6 @@
 {
   "rules": [
     {
-      "domain_regex": [
-        "^https?:\\/\\/[^\\/]+blogspot\\.(.*)"
-      ]
-    },
-    {
       "domain_suffix": [
         "000webhost.com",
         "0rz.tw",
