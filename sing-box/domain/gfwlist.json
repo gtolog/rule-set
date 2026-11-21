@@ -4417,11 +4417,6 @@
         "zyxel.com",
         "zzcloud.me"
       ]
-    },
-    {
-      "ip_cidr": [
-        "85.17.73.31"
-      ]
     }
   ],
   "version": 2
