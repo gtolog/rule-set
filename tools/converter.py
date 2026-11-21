@@ -141,9 +141,16 @@ def parse_gfwlist_rows(text: str):
             continue
 
         if line.startswith("/") and line.endswith("/") and len(line) > 2:
-            pattern_body = line[1:-1]
-            if pattern_body:
-                rows.append({'pattern': 'DOMAIN-REGEX', 'address': pattern_body})
+            pattern_body = line[1:-1].strip()
+            if not pattern_body:
+                continue
+
+            # 跳过带协议头或明显针对完整 URL / 路径的正则（sing-box domain_regex 只匹配域名）
+            if "http" in pattern_body or "://" in pattern_body or "/" in pattern_body:
+                print(f"[GFWList Skip URL Regex] {pattern_body}")
+                continue
+
+            rows.append({'pattern': 'DOMAIN-REGEX', 'address': pattern_body})
             continue
 
         if line.startswith(("||", "|", ".")):
