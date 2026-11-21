@@ -79,16 +79,16 @@ jobs:
 
     - name: Run Converter (QX & sing-box)
       run: |
-        python tools/converter.py "tools/ipcidr" "qx/filter/ip" --target qx
-        python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain" --target qx
-        python tools/converter.py "tools/xray-geosite" "qx/filter/domain" --target qx
-        python tools/converter.py "tools/gfwlist" "qx/filter/domain" --target qx --name gfwlist
+        python tools/converter.py "tools/ipcidr" "qx/filter/ip" --target qx-ip
+        python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain" --target qx-domain
+        python tools/converter.py "tools/xray-geosite" "qx/filter/domain" --target qx-domain
+        python tools/converter.py "tools/gfwlist" "qx/filter/domain" --target qx-domain --name gfwlist
         
-        python tools/converter.py "tools/ipcidr" "sing-box/ip" --target singbox
-        python tools/converter.py "tools/qx-filter-ip" "sing-box/ip" --target singbox
-        python tools/converter.py "tools/qx-filter-domain" "sing-box/domain" --target singbox
-        python tools/converter.py "tools/xray-geosite" "sing-box/domain" --target singbox
-        python tools/converter.py "tools/gfwlist" "sing-box/domain" --target singbox --name gfwlist
+        python tools/converter.py "tools/ipcidr" "sing-box/ip" --target singbox-ip
+        python tools/converter.py "tools/qx-filter-ip" "sing-box/ip" --target singbox-ip
+        python tools/converter.py "tools/qx-filter-domain" "sing-box/domain" --target singbox-domain
+        python tools/converter.py "tools/xray-geosite" "sing-box/domain" --target singbox-domain
+        python tools/converter.py "tools/gfwlist" "sing-box/domain" --target singbox-domain --name gfwlist
 
     - name: Run Xray Converter and Build Dat
       run: |
