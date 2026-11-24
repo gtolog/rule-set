@@ -145,7 +145,6 @@ def parse_gfwlist_rows(text: str):
             if not pattern_body:
                 continue
 
-            # 跳过带协议头或明显针对完整 URL / 路径的正则（sing-box domain_regex 只匹配域名）
             if "http" in pattern_body or "://" in pattern_body or "/" in pattern_body:
                 print(f"[GFWList Skip URL Regex] {pattern_body}")
                 continue
@@ -338,6 +337,53 @@ def export_quantumult_x(df: pd.DataFrame, output_path: str):
     print(f"[Export QX] Successfully generated: {output_path} ({len(lines)} rules)")
 
 
+def export_clash_yaml(df: pd.DataFrame, output_path: str):
+    """导出为 Clash / Mihomo 规则集 .yaml 格式（payload 列表）"""
+    clash_pat_map = {
+        'HOST-SUFFIX': 'DOMAIN-SUFFIX',
+        'HOST': 'DOMAIN',
+        'HOST-KEYWORD': 'DOMAIN-KEYWORD',
+        'HOST-REGEX': 'DOMAIN-REGEX',
+        'URL-REGEX': 'DOMAIN-REGEX',
+        'HOST-WILDCARD': 'DOMAIN-WILDCARD',
+        'IP6-CIDR': 'IP-CIDR6',
+    }
+
+    payload = []
+    seen = set()
+
+    for _, row in df.iterrows():
+        pat = str(row['pattern']).strip().upper()
+        addr = str(row['address']).strip()
+        if not pat or not addr:
+            continue
+
+        pat = clash_pat_map.get(pat, pat)
+
+        if pat == 'DOMAIN-REGEX':
+            if '://' in addr or ('/' in addr and not addr.startswith('\\')):
+                print(f"[Export Clash Warning] Skipping URL/path regex: {addr}")
+                continue
+
+        if pat in ('IP-CIDR', 'IP-CIDR6'):
+            try:
+                net = ipaddress.ip_network(addr, strict=False)
+                pat = 'IP-CIDR6' if net.version == 6 else 'IP-CIDR'
+                addr = str(net)
+            except Exception:
+                pass
+
+        rule_line = f"{pat},{addr}"
+        if rule_line not in seen:
+            seen.add(rule_line)
+            payload.append(rule_line)
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        yaml.safe_dump({"payload": payload}, f, allow_unicode=True, sort_keys=False)
+
+    print(f"[Export Clash] Successfully generated: {output_path} ({len(payload)} rules)")
+
+
 def export_singbox(df: pd.DataFrame, output_path_base: str):
     """导出为 sing-box JSON 并编译为 .srs 二进制文件（支持通配符自动转正则）"""
     df_sb = df.copy()
@@ -445,9 +491,9 @@ def load_and_parse(source: str) -> pd.DataFrame:
 
 
 def export_by_target(df: pd.DataFrame, output_dir: str, target_type: str, base_name: str):
-    if target_type in ('qx-domain', 'singbox-domain'):
+    if target_type in ('qx-domain', 'singbox-domain', 'clash-domain'):
         df = filter_df_by_mode(df, 'domain')
-    elif target_type in ('qx-ip', 'singbox-ip'):
+    elif target_type in ('qx-ip', 'singbox-ip', 'clash-ip'):
         df = filter_df_by_mode(df, 'ip')
 
     if df.empty:
@@ -458,6 +504,8 @@ def export_by_target(df: pd.DataFrame, output_dir: str, target_type: str, base_n
 
     if target_type in ('qx', 'qx-domain', 'qx-ip'):
         export_quantumult_x(df, os.path.join(output_dir, f"{base_name}.list"))
+    elif target_type in ('clash', 'clash-domain', 'clash-ip'):
+        export_clash_yaml(df, os.path.join(output_dir, f"{base_name}.yaml"))
     elif target_type in ('singbox', 'singbox-domain', 'singbox-ip'):
         export_singbox(df, os.path.join(output_dir, base_name))
     elif target_type == 'xray-domain':
@@ -467,12 +515,17 @@ def export_by_target(df: pd.DataFrame, output_dir: str, target_type: str, base_n
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Unified Rule Converter for QX, sing-box, and Xray.")
+    parser = argparse.ArgumentParser(description="Unified Rule Converter for QX, Clash, sing-box, and Xray.")
     parser.add_argument('input', help='Input rules file, URL, or a file containing list of paths')
     parser.add_argument('output_dir', help='Output directory')
     parser.add_argument(
         '--target',
-        choices=['qx', 'qx-domain', 'qx-ip', 'singbox', 'singbox-domain', 'singbox-ip', 'xray-domain', 'xray-ip'],
+        choices=[
+            'qx', 'qx-domain', 'qx-ip',
+            'clash', 'clash-domain', 'clash-ip',
+            'singbox', 'singbox-domain', 'singbox-ip',
+            'xray-domain', 'xray-ip'
+        ],
         default='qx',
         help='Conversion target format'
     )
