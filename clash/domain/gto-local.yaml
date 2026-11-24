@@ -1,0 +1,26 @@
+payload:
+- DOMAIN-SUFFIX,lan
+- DOMAIN-SUFFIX,home.arpa
+- DOMAIN-SUFFIX,service.arpa
+- DOMAIN-SUFFIX,local
+- DOMAIN-WILDCARD,*.10.in-addr.arpa
+- DOMAIN-WILDCARD,*.168.192.in-addr.arpa
+- DOMAIN-WILDCARD,*.16.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.17.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.18.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.19.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.20.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.21.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.22.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.23.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.24.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.25.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.26.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.27.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.28.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.29.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.30.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.31.172.in-addr.arpa
+- DOMAIN-WILDCARD,*.127.in-addr.arpa
+- DOMAIN-WILDCARD,*.254.169.in-addr.arpa
+- DOMAIN-WILDCARD,*.ip6.arpa
