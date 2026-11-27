@@ -87,6 +87,7 @@ jobs:
       run: |
         python tools/converter.py "tools/ipcidr" "qx/filter/ip" --target qx-ip
         python tools/converter.py "tools/sing-box-geosite" "qx/filter/domain" --target qx-domain
+        python tools/converter.py "tools/sing-box-geosite-amazon-cn" "qx/filter/domain" --target qx-domain
         python tools/converter.py "tools/xray-geosite" "qx/filter/domain" --target qx-domain
         python tools/converter.py "tools/gfwlist" "qx/filter/domain" --target qx-domain --name gfwlist
         
@@ -105,6 +106,7 @@ jobs:
         python tools/converter.py "tools/qx-filter-ip" "xray/ip" --target xray-ip
         python tools/converter.py "tools/qx-filter-domain" "xray/domain" --target xray-domain
         python tools/converter.py "tools/sing-box-geosite" "xray/domain" --target xray-domain
+        python tools/converter.py "tools/sing-box-geosite-amazon-cn" "xray/domain" --target xray-domain --name amazon-cn
         python tools/converter.py "tools/gfwlist" "xray/domain" --target xray-domain --name gfwlist
 
         # --- 编译 domain-list-community ---
